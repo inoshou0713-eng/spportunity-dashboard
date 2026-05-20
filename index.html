@@ -19,8 +19,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;}
-
-/* ── ヘッダー ── */
 header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
   display:flex;align-items:center;justify-content:space-between;
   position:sticky;top:0;z-index:300;box-shadow:0 2px 12px #0d1f3322;}
@@ -41,8 +39,6 @@ header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
   white-space:nowrap;transition:all .15s;}
 .hbtn:hover{background:#ffffff1a;color:#fff;}
 .hbtn.active{background:var(--warn);border-color:var(--warn);color:#fff;}
-
-/* ── 同期バー ── */
 .sync-bar{padding:7px 24px;display:flex;align-items:center;gap:10px;
   font-size:11px;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;}
 .sync-bar.ok  {background:#edfaf4;border-color:var(--sync-ok);color:#0d5c3a;}
@@ -53,8 +49,6 @@ header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
 .sync-bar.ng .sync-dot{background:var(--sync-ng);}
 .sync-bar.wait .sync-dot{background:var(--sync-wait);animation:blink 1s infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
-
-/* ── バナー ── */
 .msg-banner{display:none;padding:9px 24px;font-size:13px;font-weight:700;
   align-items:center;gap:10px;border-bottom:2px solid transparent;transition:all .4s;}
 .msg-banner.on{display:flex;}
@@ -64,8 +58,6 @@ header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
 .move-banner{display:none;background:var(--blue-ll);border-bottom:2px solid var(--blue);
   padding:8px 24px;font-size:12px;color:var(--blue-d);align-items:center;gap:8px;}
 .move-banner.on{display:flex;}
-
-/* ── フィルター ── */
 .filter-bar{background:var(--surface);border-bottom:1px solid var(--border);
   padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .filter-label{font-size:11px;color:var(--muted);}
@@ -76,8 +68,6 @@ header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
 .fbtn.f-all.sel {background:var(--text);border-color:var(--text);color:#fff;}
 .fbtn.f-exec.sel{background:var(--exec);border-color:var(--exec);color:#fff;}
 .fbtn.f-cons.sel{background:var(--cons);border-color:var(--cons);color:#fff;}
-
-/* ── サブヘッダー ── */
 .subhd{background:var(--surface);border-bottom:1px solid var(--border);
   padding:12px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
 .pj-label{font-size:11px;color:var(--muted);}
@@ -90,34 +80,26 @@ header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
 .snum{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;line-height:1;}
 .slbl{font-size:10px;color:var(--muted);margin-top:2px;}
 .c-acc{color:var(--accent);}.c-exec{color:var(--exec);}.c-cons{color:var(--cons);}
-
-/* ── 凡例 ── */
 .legend{display:flex;align-items:center;gap:11px;flex-wrap:wrap;
   padding:7px 24px;background:var(--surface2);border-bottom:1px solid var(--border);}
 .lgd-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ldot{width:11px;height:11px;border-radius:3px;}
-
-/* ── セクションタイトル ── */
 .section-title{font-size:14px;font-weight:900;margin:28px 0 10px;
   display:flex;align-items:center;gap:10px;padding:0 4px;}
 .section-title::after{content:'';flex:1;height:2px;
   background:linear-gradient(to right,var(--border),transparent);pointer-events:none;}
-
-/* ── テーブル ── */
 .main{padding:16px 16px 80px;max-width:1220px;margin:0 auto;}
 .tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);
   border-radius:14px;margin-bottom:8px;box-shadow:0 1px 8px #1a6fc408;}
 table{border-collapse:collapse;min-width:860px;width:100%;}
 col.col-cat{width:86px;}col.col-role{width:82px;}
 col.col-week{width:106px;}col.col-start{width:92px;}col.col-post{width:116px;}
-
 thead th{background:var(--blue-d);color:#fff;font-size:11px;font-weight:700;
   padding:0;text-align:center;border-right:1px solid #ffffff1a;}
 thead th:first-child{border-radius:14px 0 0 0;}
 thead th:last-child{border-radius:0 14px 0 0;border-right:none;}
 thead th.hl{background:var(--blue);}
 thead th.hl-post{background:var(--cat5);}
-
 .th-inner{padding:9px 5px 5px;}
 .th-week{font-size:11px;font-weight:700;}
 .th-date{display:block;width:90%;margin:4px auto 5px;border:none;
@@ -130,7 +112,6 @@ thead th.hl-post{background:var(--cat5);}
 .days-future{background:#ffffff2a;color:#fff;}
 .days-past{background:#ff333322;color:#ffbbbb;}
 .days-today{background:#ffff0033;color:#ffeeaa;}
-
 .cat-cell{text-align:center;font-size:11px;font-weight:900;
   writing-mode:horizontal-tb;padding:6px 4px;
   border-right:1px solid var(--border);white-space:normal;
@@ -141,7 +122,6 @@ thead th.hl-post{background:var(--cat5);}
   text-align:center;white-space:nowrap;vertical-align:middle;}
 .role-exec{color:var(--exec);background:var(--exec-l);}
 .role-cons{color:var(--cons);background:var(--cons-l);}
-
 td.task-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);
   padding:4px;vertical-align:top;}
 td.task-cell:last-child{border-right:none;}
@@ -151,7 +131,6 @@ td.empty-cell:last-child{border-right:none;}
 td.drag-over{background:var(--exec-l)!important;border:2px dashed var(--exec)!important;}
 tr.cat-top td{border-top:2px solid var(--border);}
 tr.hide-row{display:none;}
-
 .cc-1{background:#fff4f8;border-left:3px solid var(--cat1);}
 .cc-2{background:var(--blue-ll);border-left:3px solid var(--cat2);}
 .cc-3{background:#fffbf0;border-left:3px solid var(--cat3);}
@@ -159,8 +138,6 @@ tr.hide-row{display:none;}
 .cc-5{background:#fff5f5;border-left:3px solid var(--cat5);}
 .cat-1{color:var(--cat1);}.cat-2{color:var(--cat2);}
 .cat-3{color:var(--cat3);}.cat-4{color:var(--cat4);}.cat-5{color:var(--cat5);}
-
-/* ── タスクカード ── */
 .task-card{border-radius:7px;padding:6px 24px 6px 8px;font-size:11px;line-height:1.45;
   border:1.5px solid transparent;position:relative;
   transition:filter .15s,background .18s,border-color .18s,color .18s,box-shadow .35s;
@@ -173,23 +150,19 @@ body.move-mode .task-card:active{cursor:grabbing;}
 body.move-mode .task-card.dragging{opacity:.35;transform:scale(.95);}
 .task-card.synced-flash{animation:flashBlue .9s ease forwards;}
 @keyframes flashBlue{0%{box-shadow:0 0 0 4px var(--blue);}100%{box-shadow:0 0 0 0 transparent;}}
-
 .tc-exec{background:var(--exec-l);border-color:#b3d4f0;color:#0d3a6e;}
 .tc-exec.done{background:var(--exec);border-color:var(--exec);color:#fff;}
 .tc-cons{background:var(--cons-l);border-color:#a0ddd6;color:#0a4a44;}
 .tc-cons.done{background:var(--cons);border-color:var(--cons);color:#fff;}
-
 .chk{position:absolute;top:6px;right:6px;width:13px;height:13px;border-radius:50%;
   border:1.5px solid currentColor;opacity:.3;font-size:8px;
   display:flex;align-items:center;justify-content:center;pointer-events:none;}
 .task-card.done .chk{opacity:1;border:none;}
-
 .pen-btn{display:none;position:absolute;top:4px;right:4px;width:17px;height:17px;
   border-radius:4px;background:var(--warn);color:#fff;border:none;
   font-size:9px;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
 body.edit-mode .pen-btn{display:flex;}
 body.edit-mode .chk{display:none;}
-
 .move-arrows{display:none;position:absolute;top:3px;right:3px;flex-direction:row;gap:2px;z-index:10;}
 body.move-mode .move-arrows{display:flex;}
 body.move-mode .chk{display:none;}
@@ -199,14 +172,12 @@ body.move-mode .pen-btn{display:none!important;}
   display:flex;align-items:center;justify-content:center;padding:0;}
 .marr:hover{background:var(--blue-d);}
 .marr:disabled{background:var(--border);cursor:default;}
-
 .task-text{white-space:pre-line;pointer-events:none;word-break:break-word;padding-right:2px;}
 body.edit-mode .task-card.editing .task-text{display:none;}
 .task-ta{display:none;width:100%;background:#fffde7;border:none;border-radius:3px;
   outline:none;font-family:'Noto Sans JP',sans-serif;font-size:11px;
   line-height:1.45;color:var(--text);resize:none;padding:2px 3px;min-height:36px;}
 body.edit-mode .task-card.editing .task-ta{display:block;}
-
 .memo-btn{display:inline-flex;align-items:center;gap:3px;background:none;
   border:1px dashed var(--border);border-radius:4px;font-size:9px;color:var(--muted);
   cursor:pointer;padding:2px 5px;margin-top:4px;
@@ -216,8 +187,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 .memo-preview{background:#fffde7;border:1px solid #e8a02033;border-radius:4px;
   padding:4px 7px;font-size:10px;color:#5a4000;line-height:1.4;
   margin-top:4px;white-space:pre-line;word-break:break-word;}
-
-/* ── サマリーカード ── */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px;}
 .phase-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
 .pcard-title{font-size:12px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
@@ -225,8 +194,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 .pbar-w{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin-bottom:4px;}
 .pbar-f{height:100%;border-radius:3px;transition:width .4s;}
 .pbar-l{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
-
-/* ── モーダル ── */
 .overlay{display:none;position:fixed;inset:0;background:#0d1f3366;
   z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
 .overlay.open{display:flex;}
@@ -253,8 +220,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 .btn-cancel:hover{background:var(--border2);}
 .btn-del{background:none;color:var(--cat5);border:1px solid #d9404033;margin-right:auto;}
 .btn-del:hover{background:#d9404011;}
-
-/* ── ID未設定画面 ── */
 .no-id-screen{display:none;flex-direction:column;align-items:center;
   justify-content:center;min-height:60vh;padding:40px 20px;text-align:center;}
 .no-id-screen.show{display:flex;}
@@ -265,8 +230,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
   border-radius:10px;padding:16px 22px;font-family:'Space Mono',monospace;
   font-size:13px;color:var(--blue-d);margin-bottom:8px;}
 .no-id-note{font-size:11px;color:var(--muted);}
-
-/* ── タスク追加モーダル専用 ── */
 .add-form-row{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
 .add-form-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
 .add-form-input,.add-form-select,.add-form-ta{
@@ -277,8 +240,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 .add-form-ta{resize:vertical;min-height:64px;}
 .add-form-row-h{display:flex;gap:10px;}
 .add-form-row-h .add-form-row{flex:1;margin-bottom:0;}
-
-/* ── フェーズ別進捗バー ── */
 .phase-progress-bar{
   background:var(--surface);border:1px solid var(--border);border-radius:12px;
   padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 6px #1a6fc408;
@@ -289,7 +250,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 .phase-prog-track{height:10px;background:var(--border2);border-radius:5px;overflow:hidden;}
 .phase-prog-fill{height:100%;border-radius:5px;transition:width .5s;}
 .phase-prog-sub{font-size:10px;color:var(--muted);margin-top:5px;font-family:'Space Mono',monospace;}
-
 @media(max-width:700px){
   header,.subhd,.filter-bar,.legend,
   .edit-banner,.msg-banner,.move-banner,.sync-bar{padding-left:12px;padding-right:12px;}
@@ -370,7 +330,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 
 <div id="mainUI" style="display:none">
   <div class="main">
-    <!-- 日付入力バー -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;
                 padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;
                 gap:18px;flex-wrap:wrap;box-shadow:0 1px 6px #1a6fc408;">
@@ -400,7 +359,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
                font-family:'Noto Sans JP',sans-serif;">🗑 日付をクリア</button>
     </div>
 
-    <!-- フェーズ別進捗バー -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;" id="phaseProgressArea">
       <div class="phase-progress-bar">
         <div class="phase-prog-title">
@@ -460,8 +418,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
       <div class="modal-title" style="font-size:15px;font-weight:900;">➕ タスクを追加</div>
       <button class="modal-x" onclick="closeAddModal()">✕</button>
     </div>
-
-    <!-- フェーズ切り替えタブ -->
     <div style="display:flex;gap:8px;margin-bottom:16px;">
       <button id="addTab1" onclick="switchAddPhase(1)"
         style="flex:1;padding:8px;border-radius:7px;border:2px solid var(--blue);
@@ -476,15 +432,11 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
         🏁 終了後フェーズ
       </button>
     </div>
-
-    <!-- タスク名 -->
     <div class="add-form-row">
       <div class="add-form-label">タスク名</div>
       <textarea class="add-form-ta" id="addText" rows="2"
         placeholder="例：SNS告知用の画像を準備する"></textarea>
     </div>
-
-    <!-- 担当 / タイミング -->
     <div class="add-form-row-h">
       <div class="add-form-row">
         <div class="add-form-label">担当</div>
@@ -498,13 +450,10 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
         <select class="add-form-select" id="addWeek"></select>
       </div>
     </div>
-
-    <!-- カテゴリ -->
     <div class="add-form-row">
       <div class="add-form-label">カテゴリ（ジャンル）</div>
       <select class="add-form-select" id="addCat"></select>
     </div>
-
     <div class="modal-foot" style="margin-top:18px;">
       <button class="btn btn-cancel" onclick="closeAddModal()">キャンセル</button>
       <button class="btn btn-save" onclick="submitAddTask()">追加する</button>
@@ -534,7 +483,6 @@ body.edit-mode .task-card.editing .task-ta{display:block;}
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-/* ── URLパラメータ ── */
 const urlParams  = new URLSearchParams(window.location.search);
 const PROJECT_ID = (urlParams.get('id') || '').trim().replace(/[^a-zA-Z0-9\-_]/g, '');
 
@@ -548,7 +496,6 @@ if(!PROJECT_ID){
   document.getElementById('projBadgeLabel').textContent = `ID: ${PROJECT_ID}`;
 }
 
-/* ── データ定義 ── */
 const CATS1 = [
   {
     id:'kikaku', name:'企画骨子', cv:'var(--cat2)', cc:'cat-2', bg:'cc-2',
@@ -654,7 +601,6 @@ const MESSAGES = [
   { pct:  1, emoji:'👋', msg:'タスクを一つずつ確実に進めましょう！', bg:'var(--bg)', bc:'var(--border)', tc:'var(--muted)' },
 ];
 
-/* ── 状態管理 ── */
 const LOCAL_KEY = `cf_v9_${PROJECT_ID}`;
 const EMPTY_STATE = () => ({
   done:{}, pname:'', texts:{}, memos:{},
@@ -671,7 +617,6 @@ let S = loadLocal();
 ['done','texts','memos','dates1','dates2','weeks'].forEach(k=>{ if(!S[k]) S[k]={}; });
 if(!Array.isArray(S.customTasks)) S.customTasks = [];
 
-/* ── Firebase ── */
 let db=null, dbRef=null, isRemoteUpdate=false;
 
 function initFirebase(){
@@ -699,7 +644,7 @@ function initFirebase(){
       S.weeks  = remote.weeks  || {};
       S.dates1 = remote.dates1 || {};
       S.dates2 = remote.dates2 || {};
-      if(remote.pname)     S.pname     = remote.pname;
+      if(remote.pname)       S.pname       = remote.pname;
       if(remote.startDate)   S.startDate   = remote.startDate;
       if(remote.endDate)     S.endDate     = remote.endDate;
       if(remote.customTasks) S.customTasks = remote.customTasks;
@@ -738,17 +683,10 @@ function setSyncStatus(type,msg){
 
 function save(){ saveLocal(); if(!isRemoteUpdate) pushToFirebase(); }
 
-/* ── ユーティリティ ── */
 function allTasks(){
   const a=[];
-  [...CATS1,...CATS2].forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>
-    a.push({id:t.id,role:r.role,cat:c.id,def:t.text,phase:c===CATS1||CATS1.includes(c)?1:2})
-  )));
-  // フェーズ1
-  CATS1.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>{ const idx=a.findIndex(x=>x.id===t.id); if(idx>=0) a[idx].phase=1; })));
-  // フェーズ2
-  CATS2.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>{ const idx=a.findIndex(x=>x.id===t.id); if(idx>=0) a[idx].phase=2; })));
-  // カスタムタスク
+  CATS1.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>a.push({id:t.id,role:r.role,cat:c.id,def:t.text,phase:1}))));
+  CATS2.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>a.push({id:t.id,role:r.role,cat:c.id,def:t.text,phase:2}))));
   (S.customTasks||[]).forEach(ct=>a.push({id:ct.id,role:ct.role,cat:ct.catId,def:ct.text,phase:ct.phase}));
   return a;
 }
@@ -756,7 +694,6 @@ function effectiveWeek(task,maxWeek){
   return Math.max(0,Math.min(maxWeek,task.week+(S.weeks[task.id]||0)));
 }
 
-/* ── ヘッダー構築 ── */
 const LABELS1=['約7週前','約6週前','約5週前','約4週前','約3週前','約2週前','約1週前','公開開始'];
 const LABELS2=['終了直後','終了1週後','終了2週後','終了3週後'];
 
@@ -792,7 +729,6 @@ window.saveDate=(dk,i,v)=>{
   document.getElementById(`badge-${dk}-${i}`).innerHTML=v?getDaysBadge(v):'';
 };
 
-/* ── 日付自動計算 ── */
 function addDaysToDate(dateStr,days){
   const [y,m,d]=dateStr.split('-').map(Number);
   const dt=new Date(y,m-1,d+days);
@@ -839,7 +775,6 @@ window.clearAllDates=()=>{
   if(badge) badge.style.display='none';
 };
 
-/* ── テーブル構築 ── */
 let editMode=false, moveMode=false, filterMode='all', modalId=null;
 
 function buildTable(cats,tbodyId,maxWeek){
@@ -860,14 +795,12 @@ function buildTable(cats,tbodyId,maxWeek){
       rtd.className=`role-cell role-${row.role}`;
       rtd.textContent=row.role==='exec'?'実行者様':'スポチュニティ';
       tr.appendChild(rtd);
-
       const wm={};
       row.tasks.forEach(t=>{
         const ew=effectiveWeek(t,maxWeek);
         if(!wm[ew]) wm[ew]=[];
         wm[ew].push(t);
       });
-
       let w=0;
       while(w<=maxWeek){
         const tasks=wm[w];
@@ -894,28 +827,21 @@ function buildTable(cats,tbodyId,maxWeek){
     });
   });
 
-  /* カスタムタスクを末尾に追加 */
   const phase = tbodyId === 'tbody1' ? 1 : 2;
   (S.customTasks||[]).filter(ct=>ct.phase===phase).forEach(ct=>{
     const tr = document.createElement('tr');
     tr.classList.add('cat-top');
     tr.dataset.role = ct.role;
     if(filterMode!=='all'&&ct.role!==filterMode) tr.classList.add('hide-row');
-
-    // カテゴリセル
     const catTd = document.createElement('td');
     catTd.className = 'cat-cell';
     catTd.style.cssText = 'background:#f5f0ff;border-left:3px solid #7c3aed;';
     catTd.innerHTML = `<span style="color:#7c3aed;font-size:11px;">${ct.catName||'カスタム'}</span>`;
     tr.appendChild(catTd);
-
-    // 担当セル
     const roleTd = document.createElement('td');
     roleTd.className = `role-cell role-${ct.role}`;
     roleTd.textContent = ct.role==='exec'?'実行者様':'スポチュニティ';
     tr.appendChild(roleTd);
-
-    // 週セル（カスタムタスクはweeks移動なし）
     for(let w=0; w<=maxWeek; w++){
       const td = document.createElement('td');
       if(w===ct.week){
@@ -925,19 +851,15 @@ function buildTable(cats,tbodyId,maxWeek){
         const card = document.createElement('div');
         card.className = `task-card ${ct.role==='exec'?'tc-exec':'tc-cons'}${isDone?' done':''}`;
         card.id = `card-${ct.id}`;
-        // チェックアイコン
         const chk = document.createElement('div'); chk.className='chk'; chk.textContent=isDone?'✓':'';
         card.appendChild(chk);
-        // テキスト
         const te = document.createElement('div'); te.className='task-text'; te.textContent=ct.text;
         card.appendChild(te);
-        // 削除ボタン（編集モード時）
         const delBtn = document.createElement('button');
         delBtn.className='pen-btn'; delBtn.title='削除'; delBtn.textContent='✕';
         delBtn.style.background='#d94040';
         delBtn.onclick=e=>{e.stopPropagation();deleteCustomTask(ct.id,tbodyId,maxWeek);};
         card.appendChild(delBtn);
-        // メモ
         const ma=document.createElement('div'); ma.id=`ma-${ct.id}`;
         if(hasMemo){const mp=document.createElement('div');mp.className='memo-preview';mp.textContent=S.memos[ct.id];ma.appendChild(mp);}
         const mb=document.createElement('button');mb.className=`memo-btn${hasMemo?' has':''}`;mb.id=`mb-${ct.id}`;
@@ -972,31 +894,26 @@ function makeCard(task,role,maxWeek,tbodyId){
   const card=document.createElement('div');
   card.className=`task-card ${role==='exec'?'tc-exec':'tc-cons'}${isDone?' done':''}`;
   card.id=`card-${task.id}`; card.draggable=false;
-
   const chk=document.createElement('div'); chk.className='chk'; chk.textContent=isDone?'✓':'';
   card.appendChild(chk);
   const pen=document.createElement('button'); pen.className='pen-btn'; pen.textContent='✏';
   pen.onclick=e=>{e.stopPropagation();startEdit(task.id,card);}; card.appendChild(pen);
-
   const arrows=document.createElement('div'); arrows.className='move-arrows';
   const lb=document.createElement('button'); lb.className='marr'; lb.textContent='◀'; lb.disabled=curWeek===0;
   lb.onclick=e=>{e.stopPropagation();shiftTask(task.id,-1,maxWeek,tbodyId);};
   const rb=document.createElement('button'); rb.className='marr'; rb.textContent='▶'; rb.disabled=curWeek>=maxWeek;
   rb.onclick=e=>{e.stopPropagation();shiftTask(task.id,+1,maxWeek,tbodyId);};
   arrows.appendChild(lb); arrows.appendChild(rb); card.appendChild(arrows);
-
   const te=document.createElement('div'); te.className='task-text'; te.textContent=txt; card.appendChild(te);
   const ta=document.createElement('textarea'); ta.className='task-ta'; ta.value=txt; ta.rows=3;
   ta.onclick=e=>e.stopPropagation();
   ta.onblur=()=>finishEdit(task.id,card);
   ta.onkeydown=e=>{if(e.key==='Escape') cancelEdit(task.id,card);}; card.appendChild(ta);
-
   const ma=document.createElement('div'); ma.id=`ma-${task.id}`;
   if(hasMemo){ const mp=document.createElement('div'); mp.className='memo-preview'; mp.textContent=S.memos[task.id]; ma.appendChild(mp); }
   const mb=document.createElement('button'); mb.className=`memo-btn${hasMemo?' has':''}`; mb.id=`mb-${task.id}`;
   mb.innerHTML=hasMemo?'📝 メモあり':'+ メモ';
   mb.onclick=e=>{e.stopPropagation();openModal(task.id,txt);}; ma.appendChild(mb); card.appendChild(ma);
-
   card.onclick=()=>{if(editMode||moveMode) return; toggleDone(task.id);};
   setupDragSource(card,task.id,maxWeek,tbodyId);
   return card;
@@ -1026,7 +943,6 @@ function rebuildAll(){
   }
 }
 
-/* ── チェック ── */
 function toggleDone(id){
   S.done[id]=!S.done[id];
   const card=document.getElementById(`card-${id}`);
@@ -1034,7 +950,6 @@ function toggleDone(id){
   save(); updateStats();
 }
 
-/* ── 週移動 ── */
 function shiftTask(id,delta,maxWeek,tbodyId){
   S.weeks[id]=(S.weeks[id]||0)+delta; save();
   if(tbodyId==='tbody1') buildTable(CATS1,'tbody1',7);
@@ -1042,7 +957,6 @@ function shiftTask(id,delta,maxWeek,tbodyId){
   updateStats();
 }
 
-/* ── ドラッグ&ドロップ（移動モード） ── */
 let dragTaskId=null, dragMaxWeek=null, dragTbodyId=null;
 function setupDragSource(card,taskId,maxWeek,tbodyId){
   card.addEventListener('dragstart',e=>{
@@ -1077,7 +991,6 @@ function setupDropTarget(td){
   });
 }
 
-/* ── フィルター ── */
 window.setFilter=(mode)=>{
   filterMode=mode;
   ['all','exec','cons'].forEach(m=>document.getElementById(`f-${m}`).classList.toggle('sel',m===mode));
@@ -1088,7 +1001,6 @@ window.setFilter=(mode)=>{
   });
 };
 
-/* ── 編集・移動モード ── */
 window.toggleEdit=()=>{
   if(moveMode) window.toggleMove();
   document.querySelectorAll('.task-card.editing').forEach(c=>finishEdit(c.id.replace('card-',''),c));
@@ -1132,7 +1044,6 @@ function cancelEdit(id,card){
   if(ta&&te) ta.value=te.textContent;
 }
 
-/* ── メモ ── */
 window.closeModal=()=>{ document.getElementById('overlay').classList.remove('open'); modalId=null; };
 window.overlayClick=(e)=>{ if(e.target===document.getElementById('overlay')) window.closeModal(); };
 window.saveMemo=()=>{
@@ -1168,7 +1079,6 @@ function refreshMemo(id){
   if(mb){ mb.className=`memo-btn${hasMemo?' has':''}`; mb.innerHTML=hasMemo?'📝 メモあり':'+ メモ'; }
 }
 
-/* ── 統計・メッセージ ── */
 function updateStats(){
   const all=allTasks();
   const tot=all.length, don=all.filter(t=>S.done[t.id]).length;
@@ -1193,28 +1103,24 @@ function updateStats(){
     if(pn) pn.textContent=`${d2}/${t2}`;
   });
   updateMessage(pct);
-
-  // フェーズ別進捗
-  const all1 = allTasks().filter(t=>t.phase===1);
-  const all2 = allTasks().filter(t=>t.phase===2);
-  const don1 = all1.filter(t=>S.done[t.id]).length;
-  const don2 = all2.filter(t=>S.done[t.id]).length;
-  const pct1 = all1.length ? Math.round(don1/all1.length*100) : 0;
-  const pct2 = all2.length ? Math.round(don2/all2.length*100) : 0;
-
-  const p1Pct  = document.getElementById('prog1Pct');
-  const p1Fill = document.getElementById('prog1Fill');
-  const p1Sub  = document.getElementById('prog1Sub');
-  const p2Pct  = document.getElementById('prog2Pct');
-  const p2Fill = document.getElementById('prog2Fill');
-  const p2Sub  = document.getElementById('prog2Sub');
-
-  if(p1Pct)  p1Pct.textContent  = pct1 + '%';
-  if(p1Fill) p1Fill.style.width = pct1 + '%';
-  if(p1Sub)  p1Sub.textContent  = `${don1} / ${all1.length} タスク完了`;
-  if(p2Pct)  p2Pct.textContent  = pct2 + '%';
-  if(p2Fill) p2Fill.style.width = pct2 + '%';
-  if(p2Sub)  p2Sub.textContent  = `${don2} / ${all2.length} タスク完了`;
+  const all1=allTasks().filter(t=>t.phase===1);
+  const all2=allTasks().filter(t=>t.phase===2);
+  const don1=all1.filter(t=>S.done[t.id]).length;
+  const don2=all2.filter(t=>S.done[t.id]).length;
+  const pct1=all1.length?Math.round(don1/all1.length*100):0;
+  const pct2=all2.length?Math.round(don2/all2.length*100):0;
+  const p1Pct=document.getElementById('prog1Pct');
+  const p1Fill=document.getElementById('prog1Fill');
+  const p1Sub=document.getElementById('prog1Sub');
+  const p2Pct=document.getElementById('prog2Pct');
+  const p2Fill=document.getElementById('prog2Fill');
+  const p2Sub=document.getElementById('prog2Sub');
+  if(p1Pct) p1Pct.textContent=pct1+'%';
+  if(p1Fill) p1Fill.style.width=pct1+'%';
+  if(p1Sub) p1Sub.textContent=`${don1} / ${all1.length} タスク完了`;
+  if(p2Pct) p2Pct.textContent=pct2+'%';
+  if(p2Fill) p2Fill.style.width=pct2+'%';
+  if(p2Sub) p2Sub.textContent=`${don2} / ${all2.length} タスク完了`;
 }
 function updateMessage(pct){
   const banner=document.getElementById('msgBanner');
@@ -1226,7 +1132,6 @@ function updateMessage(pct){
     <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:18px;font-weight:900">${pct}%</span>`;
 }
 
-/* ── サマリーカード ── */
 function buildCards(){
   const g=document.getElementById('cardsGrid'); g.innerHTML='';
   [...CATS1,...CATS2].forEach(cat=>{
@@ -1248,94 +1153,59 @@ function buildCards(){
   });
 }
 
-/* ── タスク追加モーダル ── */
-let addPhase = 1;
-
-window.openAddModal = function(){
-  addPhase = 1;
-  updateAddWeekOptions();
-  updateAddCatOptions();
-  updateAddPhaseTabs();
-  document.getElementById('addText').value = '';
+let addPhase=1;
+window.openAddModal=function(){
+  addPhase=1;
+  updateAddWeekOptions(); updateAddCatOptions(); updateAddPhaseTabs();
+  document.getElementById('addText').value='';
   document.getElementById('addOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('addText').focus(), 80);
+  setTimeout(()=>document.getElementById('addText').focus(),80);
 };
-
-window.closeAddModal = function(){
-  document.getElementById('addOverlay').classList.remove('open');
+window.closeAddModal=function(){ document.getElementById('addOverlay').classList.remove('open'); };
+window.switchAddPhase=function(phase){
+  addPhase=phase;
+  updateAddWeekOptions(); updateAddCatOptions(); updateAddPhaseTabs();
 };
-
-window.switchAddPhase = function(phase){
-  addPhase = phase;
-  updateAddWeekOptions();
-  updateAddCatOptions();
-  updateAddPhaseTabs();
-};
-
 function updateAddWeekOptions(){
-  const sel = document.getElementById('addWeek');
-  if(!sel) return;
-  const labels = addPhase === 1 ? LABELS1 : LABELS2;
-  sel.innerHTML = '';
-  labels.forEach((lbl, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = lbl;
-    sel.appendChild(opt);
-  });
+  const sel=document.getElementById('addWeek'); if(!sel) return;
+  const labels=addPhase===1?LABELS1:LABELS2;
+  sel.innerHTML='';
+  labels.forEach((lbl,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=lbl; sel.appendChild(opt); });
 }
-
 function updateAddCatOptions(){
-  const sel = document.getElementById('addCat');
-  if(!sel) return;
-  const cats = addPhase === 1 ? CATS1 : CATS2;
-  sel.innerHTML = '';
-  cats.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.name.replace(/\n/g, '');
-    sel.appendChild(opt);
-  });
+  const sel=document.getElementById('addCat'); if(!sel) return;
+  const cats=addPhase===1?CATS1:CATS2;
+  sel.innerHTML='';
+  cats.forEach(c=>{ const opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.name.replace(/\n/g,''); sel.appendChild(opt); });
 }
-
 function updateAddPhaseTabs(){
-  const t1 = document.getElementById('addTab1');
-  const t2 = document.getElementById('addTab2');
-  if(!t1 || !t2) return;
-  if(addPhase === 1){
-    t1.style.cssText += 'background:var(--blue);border-color:var(--blue);color:#fff;';
-    t2.style.cssText += 'background:var(--bg);border-color:var(--border);color:var(--muted);';
+  const t1=document.getElementById('addTab1'); const t2=document.getElementById('addTab2');
+  if(!t1||!t2) return;
+  if(addPhase===1){
+    t1.style.cssText+='background:var(--blue);border-color:var(--blue);color:#fff;';
+    t2.style.cssText+='background:var(--bg);border-color:var(--border);color:var(--muted);';
   } else {
-    t1.style.cssText += 'background:var(--bg);border-color:var(--border);color:var(--muted);';
-    t2.style.cssText += 'background:var(--cat5);border-color:var(--cat5);color:#fff;';
+    t1.style.cssText+='background:var(--bg);border-color:var(--border);color:var(--muted);';
+    t2.style.cssText+='background:var(--cat5);border-color:var(--cat5);color:#fff;';
   }
 }
-
-window.submitAddTask = function(){
-  const text = (document.getElementById('addText').value || '').trim();
-  const role = document.getElementById('addRole').value;
-  const week = parseInt(document.getElementById('addWeek').value);
-  const catId = document.getElementById('addCat').value;
+window.submitAddTask=function(){
+  const text=(document.getElementById('addText').value||'').trim();
+  const role=document.getElementById('addRole').value;
+  const week=parseInt(document.getElementById('addWeek').value);
+  const catId=document.getElementById('addCat').value;
   if(!text){ alert('タスク名を入力してください'); return; }
-
-  const cats    = addPhase === 1 ? CATS1 : CATS2;
-  const cat     = cats.find(c => c.id === catId);
-  const catName = cat ? cat.name.replace(/\n/g, '') : catId;
-
-  if(!S.customTasks) S.customTasks = [];
-  S.customTasks.push({
-    id:        'ct_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
-    text, role, week, phase: addPhase, catId, catName,
-    createdAt: Date.now(),
-  });
-  save();
-  window.closeAddModal();
-  if(addPhase === 1) buildTable(CATS1, 'tbody1', 7);
-  else               buildTable(CATS2, 'tbody2', 3);
+  const cats=addPhase===1?CATS1:CATS2;
+  const cat=cats.find(c=>c.id===catId);
+  const catName=cat?cat.name.replace(/\n/g,''):catId;
+  if(!S.customTasks) S.customTasks=[];
+  S.customTasks.push({ id:'ct_'+Date.now()+'_'+Math.random().toString(36).slice(2,5), text,role,week,phase:addPhase,catId,catName,createdAt:Date.now() });
+  save(); window.closeAddModal();
+  if(addPhase===1) buildTable(CATS1,'tbody1',7);
+  else             buildTable(CATS2,'tbody2',3);
   updateStats();
 };
 
-/* ── リセット ── */
 window.resetCheck=()=>{
   if(!confirm(`プロジェクト「${PROJECT_ID}」のチェックと週移動をリセットします。\nよろしいですか？`)) return;
   S.done={}; S.weeks={};
@@ -1349,15 +1219,10 @@ window.resetCheck=()=>{
   updateStats();
 };
 
-/* ── プロジェクト名 ── */
 const pnEl=document.getElementById('projectName');
 if(pnEl){ pnEl.value=S.pname||''; pnEl.addEventListener('input',()=>{S.pname=pnEl.value;save();}); }
 
-/* ── 初期化 ── */
-if(PROJECT_ID){
-  rebuildAll();
-  initFirebase();
-}
+if(PROJECT_ID){ rebuildAll(); initFirebase(); }
 </script>
 </body>
 </html>
