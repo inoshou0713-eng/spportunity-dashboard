@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クラファン 進捗ダッシュボード</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4f8; --surface:#fff; --surface2:#f7fafd;
+  --border:#d0dce8; --border2:#e8eef4;
+  --text:#0d1f33; --text2:#3a546b; --muted:#7a95ab;
+  --blue:#1a6fc4; --blue-d:#0f52a0; --blue-l:#e8f2fb; --blue-ll:#f0f7ff;
+  --exec:#1a6fc4; --exec-l:#e8f2fb;
+  --cons:#0d9f8f; --cons-l:#e6f7f5;
+  --accent:#e05a26; --warn:#e8a020; --success:#18a06a;
+  --cat1:#e05a8a; --cat2:#1a6fc4; --cat3:#e8a020; --cat4:#18a06a; --cat5:#d94040;
+  --sync-ok:#18a06a; --sync-ng:#d94040; --sync-wait:#e8a020;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;}
+
+/* ── ヘッダー ── */
+header{background:var(--blue-d);color:#fff;padding:0 24px;height:54px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:300;box-shadow:0 2px 12px #0d1f3322;}
+.logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.15em;
+  display:flex;align-items:center;gap:10px;}
+.logo-badge{background:var(--accent);color:#fff;font-size:9px;font-weight:700;
+  padding:2px 7px;border-radius:3px;}
+.proj-badge{background:#ffffff22;border:1px solid #ffffff33;color:#fff;
+  font-size:10px;font-family:'Space Mono',monospace;padding:3px 10px;
+  border-radius:4px;display:flex;align-items:center;gap:6px;}
+.proj-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--success);}
+.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.gbar-w{width:100px;height:4px;background:#ffffff33;border-radius:2px;overflow:hidden;}
+.gbar-f{height:100%;background:#60c0ff;border-radius:2px;transition:width .5s;}
+.gbar-l{font-family:'Space Mono',monospace;font-size:11px;color:#c8dfff;min-width:32px;}
+.hbtn{background:none;border:1px solid #ffffff33;color:#ffffffbb;font-size:11px;
+  padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;
+  white-space:nowrap;transition:all .15s;}
+.hbtn:hover{background:#ffffff1a;color:#fff;}
+.hbtn.active{background:var(--warn);border-color:var(--warn);color:#fff;}
+
+/* ── サブヘッダー内リンク ── */
+.hlink-wrap{display:flex;align-items:center;gap:0;background:#fff;
+  border:1.5px solid var(--border);border-radius:7px;overflow:hidden;min-width:0;
+  box-shadow:0 1px 4px #1a6fc40a;}
+.hlink-label{font-size:9px;font-weight:700;letter-spacing:.04em;white-space:nowrap;
+  padding:0 8px;height:28px;display:flex;align-items:center;gap:4px;flex-shrink:0;
+  border-right:1.5px solid var(--border);}
+.hlink-label.zoom{background:#e8f4ff;color:#1a6fc4;}
+.hlink-label.drive{background:#e8f8ee;color:#18863a;}
+.hlink-label-icon{font-size:11px;}
+.hlink-input{background:transparent;border:none;color:var(--text);font-size:10px;
+  outline:none;font-family:'Space Mono',monospace;width:120px;min-width:0;
+  padding:0 7px;height:28px;}
+.hlink-input::placeholder{color:var(--muted);}
+.hlink-input:focus{background:var(--blue-ll);}
+.hlink-go{background:none;border:none;border-left:1.5px solid var(--border);
+  color:var(--muted);font-size:13px;font-weight:700;
+  cursor:pointer;padding:0 8px;height:28px;line-height:1;
+  transition:all .15s;flex-shrink:0;display:flex;align-items:center;}
+.hlink-go:hover{background:var(--blue-ll);color:var(--blue);}
+.hlink-go:disabled{opacity:.3;cursor:default;}
+.hlink-divider{width:1px;height:18px;background:var(--border);flex-shrink:0;margin:0 4px;}
+
+/* ── 同期バー ── */
+.sync-bar{padding:7px 24px;display:flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;}
+.sync-bar.ok  {background:#edfaf4;border-color:var(--sync-ok);color:#0d5c3a;}
+.sync-bar.ng  {background:#fdf0f0;border-color:var(--sync-ng);color:#7a1a1a;}
+.sync-bar.wait{background:#fffbe6;border-color:var(--sync-wait);color:#6a4500;}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sync-bar.ok .sync-dot{background:var(--sync-ok);}
+.sync-bar.ng .sync-dot{background:var(--sync-ng);}
+.sync-bar.wait .sync-dot{background:var(--sync-wait);animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* ── バナー ── */
+.msg-banner{display:none;padding:9px 24px;font-size:13px;font-weight:700;
+  align-items:center;gap:10px;border-bottom:2px solid transparent;}
+.msg-banner.on{display:flex;}
+.edit-banner{display:none;background:#fffde7;border-bottom:2px solid var(--warn);
+  padding:8px 24px;font-size:12px;color:#6a4500;align-items:center;gap:8px;}
+.edit-banner.on{display:flex;}
+.move-banner{display:none;background:var(--blue-ll);border-bottom:2px solid var(--blue);
+  padding:8px 24px;font-size:12px;color:var(--blue-d);align-items:center;gap:8px;}
+.move-banner.on{display:flex;}
+
+/* ── フィルター ── */
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.filter-label{font-size:11px;color:var(--muted);}
+.fbtn{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--bg);color:var(--muted);
+  font-family:'Noto Sans JP',sans-serif;transition:all .2s;}
+.fbtn:hover{border-color:var(--blue);color:var(--blue);}
+.fbtn.f-all.sel {background:var(--text);border-color:var(--text);color:#fff;}
+.fbtn.f-exec.sel{background:var(--exec);border-color:var(--exec);color:#fff;}
+.fbtn.f-cons.sel{background:var(--cons);border-color:var(--cons);color:#fff;}
+
+/* ── サブヘッダー ── */
+.subhd{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.pj-label{font-size:11px;color:var(--muted);}
+.pj-input{border:none;border-bottom:2px solid var(--border2);background:transparent;
+  font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;
+  color:var(--text);padding:2px 4px;width:190px;outline:none;}
+.pj-input:focus{border-color:var(--blue);}
+.stat-chips{display:flex;gap:18px;flex-wrap:wrap;}
+.stat-chip{display:flex;flex-direction:column;}
+.snum{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;line-height:1;}
+.slbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.c-acc{color:var(--accent);}.c-exec{color:var(--exec);}.c-cons{color:var(--cons);}
+
+/* ── 凡例 ── */
+.legend{display:flex;align-items:center;gap:11px;flex-wrap:wrap;
+  padding:7px 24px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.lgd-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ldot{width:11px;height:11px;border-radius:3px;}
+
+/* ── セクションタイトル（トグル付き） ── */
+.section-title{font-size:14px;font-weight:900;margin:28px 0 10px;
+  display:flex;align-items:center;gap:10px;padding:0 4px;
+  cursor:pointer;user-select:none;}
+.section-title:hover{opacity:.8;}
+.section-title::after{content:'';flex:1;height:2px;
+  background:linear-gradient(to right,var(--border),transparent);}
+.toggle-icon{font-size:12px;transition:transform .25s;display:inline-block;flex-shrink:0;}
+.section-title.collapsed .toggle-icon{transform:rotate(-90deg);}
+.section-body{transition:opacity .2s;}
+.section-body.collapsed{display:none;}
+
+/* ── テーブル ── */
+.main{padding:16px 16px 80px;max-width:1220px;margin:0 auto;}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;margin-bottom:8px;box-shadow:0 1px 8px #1a6fc408;}
+table{border-collapse:collapse;min-width:860px;width:100%;}
+col.col-cat{width:86px;}col.col-role{width:82px;}
+col.col-week{width:106px;}col.col-start{width:92px;}col.col-post{width:116px;}
+thead th{background:var(--blue-d);color:#fff;font-size:11px;font-weight:700;
+  padding:0;text-align:center;border-right:1px solid #ffffff1a;}
+thead th:first-child{border-radius:14px 0 0 0;}
+thead th:last-child{border-radius:0 14px 0 0;border-right:none;}
+thead th.hl{background:var(--blue);}
+thead th.hl-post{background:var(--cat5);}
+.th-inner{padding:9px 5px 5px;}
+.th-week{font-size:11px;font-weight:700;}
+.th-date{display:block;width:90%;margin:4px auto 5px;border:none;
+  border-bottom:1px solid #ffffff44;background:transparent;color:#fff;
+  font-size:9px;text-align:center;outline:none;font-family:'Noto Sans JP',sans-serif;}
+.th-date::placeholder{color:#ffffff55;}
+.th-date:focus{border-bottom-color:#fff;}
+.days-badge{display:inline-block;font-size:9px;font-weight:700;
+  padding:2px 5px;border-radius:3px;font-family:'Space Mono',monospace;}
+.days-future{background:#ffffff2a;color:#fff;}
+.days-past{background:#ff333322;color:#ffbbbb;}
+.days-today{background:#ffff0033;color:#ffeeaa;}
+
+/* ── カテゴリ・ロールセル ── */
+.cat-cell{text-align:center;font-size:11px;font-weight:900;
+  padding:6px 4px;border-right:1px solid var(--border);
+  white-space:normal;word-break:keep-all;min-width:52px;max-width:68px;
+  line-height:1.4;vertical-align:middle;}
+.role-cell{font-size:10px;font-weight:700;padding:6px 8px;
+  border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  text-align:center;white-space:nowrap;vertical-align:middle;}
+.role-exec{color:var(--exec);background:var(--exec-l);}
+.role-cons{color:var(--cons);background:var(--cons-l);}
+
+td.task-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:4px;vertical-align:top;}
+td.task-cell:last-child{border-right:none;}
+td.empty-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:repeating-linear-gradient(45deg,transparent,transparent 5px,var(--border2) 5px,var(--border2) 6px);}
+td.empty-cell:last-child{border-right:none;}
+td.drag-over{background:var(--exec-l)!important;border:2px dashed var(--exec)!important;}
+tr.cat-top td{border-top:2px solid var(--border);}
+tr.hide-row{display:none;}
+
+.cc-1{background:#fff4f8;border-left:3px solid var(--cat1);}
+.cc-2{background:var(--blue-ll);border-left:3px solid var(--cat2);}
+.cc-3{background:#fffbf0;border-left:3px solid var(--cat3);}
+.cc-4{background:#f0fdf7;border-left:3px solid var(--cat4);}
+.cc-5{background:#fff5f5;border-left:3px solid var(--cat5);}
+.cat-1{color:var(--cat1);}.cat-2{color:var(--cat2);}
+.cat-3{color:var(--cat3);}.cat-4{color:var(--cat4);}.cat-5{color:var(--cat5);}
+
+/* ── タスクカード ── */
+.task-card{border-radius:7px;padding:6px 24px 6px 8px;font-size:11px;line-height:1.45;
+  border:1.5px solid transparent;position:relative;
+  transition:filter .15s,background .18s,border-color .18s,color .18s,box-shadow .35s;
+  min-height:34px;cursor:pointer;user-select:none;margin-bottom:3px;}
+.task-card:last-child{margin-bottom:0;}
+.task-card:hover{filter:brightness(.94);}
+body.edit-mode .task-card{cursor:default;}
+body.edit-mode .task-card:hover{filter:none;}
+body.move-mode .task-card{cursor:grab;}
+body.move-mode .task-card:active{cursor:grabbing;}
+body.move-mode .task-card.dragging{opacity:.35;transform:scale(.95);}
+.task-card.synced-flash{animation:flashBlue .9s ease forwards;}
+@keyframes flashBlue{0%{box-shadow:0 0 0 4px var(--blue);}100%{box-shadow:0 0 0 0 transparent;}}
+.tc-exec{background:var(--exec-l);border-color:#b3d4f0;color:#0d3a6e;}
+.tc-exec.done{background:var(--exec);border-color:var(--exec);color:#fff;}
+.tc-cons{background:var(--cons-l);border-color:#a0ddd6;color:#0a4a44;}
+.tc-cons.done{background:var(--cons);border-color:var(--cons);color:#fff;}
+.chk{position:absolute;top:6px;right:6px;width:13px;height:13px;border-radius:50%;
+  border:1.5px solid currentColor;opacity:.3;font-size:8px;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.task-card.done .chk{opacity:1;border:none;}
+.pen-btn{display:none;position:absolute;top:4px;right:4px;width:17px;height:17px;
+  border-radius:4px;background:var(--warn);color:#fff;border:none;
+  font-size:9px;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+body.edit-mode .pen-btn{display:flex;}
+body.edit-mode .chk{display:none;}
+.move-arrows{display:none;position:absolute;top:3px;right:3px;flex-direction:row;gap:2px;z-index:10;}
+body.move-mode .move-arrows{display:flex;}
+body.move-mode .chk{display:none;}
+body.move-mode .pen-btn{display:none!important;}
+.marr{background:var(--blue);color:#fff;border:none;border-radius:3px;
+  width:16px;height:16px;font-size:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding:0;}
+.marr:hover{background:var(--blue-d);}
+.marr:disabled{background:var(--border);cursor:default;}
+.task-text{white-space:pre-line;pointer-events:none;word-break:break-word;padding-right:2px;}
+body.edit-mode .task-card.editing .task-text{display:none;}
+.task-ta{display:none;width:100%;background:#fffde7;border:none;border-radius:3px;
+  outline:none;font-family:'Noto Sans JP',sans-serif;font-size:11px;
+  line-height:1.45;color:var(--text);resize:none;padding:2px 3px;min-height:36px;}
+body.edit-mode .task-card.editing .task-ta{display:block;}
+.memo-btn{display:inline-flex;align-items:center;gap:3px;background:none;
+  border:1px dashed var(--border);border-radius:4px;font-size:9px;color:var(--muted);
+  cursor:pointer;padding:2px 5px;margin-top:4px;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;}
+.memo-btn:hover{border-color:var(--warn);color:var(--warn);}
+.memo-btn.has{border-style:solid;border-color:var(--warn);color:var(--warn);background:#fffde7;}
+.memo-preview{background:#fffde7;border:1px solid #e8a02033;border-radius:4px;
+  padding:4px 7px;font-size:10px;color:#5a4000;line-height:1.4;
+  margin-top:4px;white-space:pre-line;word-break:break-word;}
+
+/* ── サマリーカード ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px;}
+.phase-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.pcard-title{font-size:12px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.cat-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+.pbar-w{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.pbar-f{height:100%;border-radius:3px;transition:width .4s;}
+.pbar-l{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+/* ── モーダル ── */
+.overlay{display:none;position:fixed;inset:0;background:#0d1f3366;
+  z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:16px;padding:26px;
+  width:min(460px,92vw);box-shadow:0 24px 64px #0d1f3322;animation:up .2s ease;}
+@keyframes up{from{transform:translateY(16px);opacity:0;}}
+.modal-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.modal-title{font-size:13px;font-weight:700;flex:1;line-height:1.4;}
+.modal-x{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;}
+.modal-x:hover{color:var(--text);}
+.modal-label{font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;}
+.modal-ta{width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 12px;font-family:'Noto Sans JP',sans-serif;font-size:12px;
+  line-height:1.6;resize:vertical;min-height:110px;background:var(--surface2);
+  color:var(--text);outline:none;}
+.modal-ta:focus{border-color:var(--blue);}
+.modal-meta{font-size:10px;color:var(--muted);text-align:right;margin-top:3px;}
+.modal-foot{display:flex;gap:9px;justify-content:flex-end;margin-top:16px;align-items:center;}
+.btn{border-radius:7px;padding:8px 18px;font-size:12px;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;font-weight:600;border:none;}
+.btn-save{background:var(--blue);color:#fff;}
+.btn-save:hover{background:var(--blue-d);}
+.btn-cancel{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.btn-cancel:hover{background:var(--border2);}
+.btn-del{background:none;color:var(--cat5);border:1px solid #d9404033;margin-right:auto;}
+.btn-del:hover{background:#d9404011;}
+
+/* ── ID未設定 ── */
+.no-id-screen{display:none;flex-direction:column;align-items:center;
+  justify-content:center;min-height:60vh;padding:40px 20px;text-align:center;}
+.no-id-screen.show{display:flex;}
+.no-id-icon{font-size:56px;margin-bottom:20px;}
+.no-id-title{font-size:22px;font-weight:900;margin-bottom:10px;}
+.no-id-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:28px;}
+.no-id-example{background:var(--surface);border:1.5px solid var(--border);
+  border-radius:10px;padding:16px 22px;font-family:'Space Mono',monospace;
+  font-size:13px;color:var(--blue-d);margin-bottom:8px;}
+.no-id-note{font-size:11px;color:var(--muted);}
+
+/* パスワード画面 */
+.pw-input-group{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.pw-input{border:1.5px solid var(--border);border-radius:7px;padding:10px 14px;
+  font-size:14px;color:var(--text);background:#fff;outline:none;width:100%;
+  font-family:'Noto Sans JP',sans-serif;transition:border-color .2s;}
+.pw-input:focus{border-color:var(--blue);}
+.pw-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;
+  padding:11px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;
+  font-family:'Noto Sans JP',sans-serif;transition:background .15s;}
+.pw-btn:hover{background:var(--blue-d);}
+.pw-error{font-size:11px;color:var(--cat5);min-height:16px;text-align:center;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.no-id-create-btn{background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;transition:background .15s;
+  box-shadow:0 4px 16px #1a6fc433;margin-bottom:6px;}
+.no-id-create-btn:hover{background:var(--blue-d);}
+.no-id-or{font-size:12px;color:var(--muted);margin:14px 0 8px;}
+.no-id-manual{display:flex;flex-direction:column;align-items:center;}
+.no-id-input{border:1.5px solid var(--border);border-radius:7px;padding:8px 12px;
+  font-family:'Space Mono',monospace;font-size:13px;color:var(--text);
+  background:#fff;outline:none;width:200px;transition:border-color .2s;}
+.no-id-input:focus{border-color:var(--blue);}
+.no-id-go-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;
+  padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;}
+.no-id-go-btn:hover{background:var(--blue-ll);border-color:var(--blue);color:var(--blue);}
+
+/* プロジェクト一覧 */
+.proj-list-item{display:flex;align-items:center;gap:8px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+  transition:border-color .15s;}
+.proj-list-item:hover{border-color:var(--blue);}
+.proj-list-link{flex:1;text-decoration:none;display:flex;align-items:center;gap:8px;min-width:0;}
+.proj-list-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.proj-list-id{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.proj-list-date{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.proj-list-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:11px;padding:2px 4px;border-radius:3px;flex-shrink:0;opacity:0;transition:opacity .15s;}
+.proj-list-item:hover .proj-list-del{opacity:1;}
+.proj-list-del:hover{color:var(--cat5);}
+
+/* ── タスク追加フォーム ── */
+.add-form-row{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.add-form-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
+.add-form-input,.add-form-select,.add-form-ta{
+  border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;
+  font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);
+  background:var(--surface2);outline:none;width:100%;transition:border-color .2s;}
+.add-form-input:focus,.add-form-select:focus,.add-form-ta:focus{border-color:var(--blue);}
+.add-form-ta{resize:vertical;min-height:64px;}
+.add-form-row-h{display:flex;gap:10px;}
+.add-form-row-h .add-form-row{flex:1;margin-bottom:0;}
+
+/* ── フェーズ別進捗バー ── */
+.phase-progress-bar{background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 18px;margin-bottom:8px;box-shadow:0 1px 6px #1a6fc408;}
+.phase-prog-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between;}
+.phase-prog-pct{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;}
+.phase-prog-track{height:10px;background:var(--border2);border-radius:5px;overflow:hidden;}
+.phase-prog-fill{height:100%;border-radius:5px;transition:width .5s;}
+.phase-prog-sub{font-size:10px;color:var(--muted);margin-top:5px;font-family:'Space Mono',monospace;}
+
+/* ── 追加先プレビュー ── */
+.add-target-hint{background:var(--blue-ll);border:1px solid var(--blue);
+  border-radius:6px;padding:8px 12px;font-size:11px;color:var(--blue-d);
+  margin-bottom:14px;display:none;}
+.add-target-hint.show{display:block;}
+
+/* ── 打ち合わせToDo・メモパネル ── */
+.mtg-panel{background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;margin-bottom:12px;box-shadow:0 1px 8px #1a6fc408;overflow:hidden;}
+.mtg-panel-head{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  cursor:pointer;user-select:none;border-bottom:1px solid transparent;
+  transition:background .15s;}
+.mtg-panel-head:hover{background:var(--surface2);}
+.mtg-panel-head.open{border-bottom-color:var(--border);}
+.mtg-panel-title{font-size:13px;font-weight:900;flex:1;}
+.mtg-panel-toggle{font-size:11px;color:var(--muted);transition:transform .25s;display:inline-block;}
+.mtg-panel-head.open .mtg-panel-toggle{transform:rotate(0deg);}
+.mtg-panel-head:not(.open) .mtg-panel-toggle{transform:rotate(-90deg);}
+.mtg-panel-body{display:none;padding:14px 16px;}
+.mtg-panel-body.open{display:flex;gap:16px;flex-wrap:wrap;}
+
+/* ToDo列 */
+.mtg-todo-col{flex:1;min-width:220px;}
+.mtg-todo-title{font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.todo-list{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+.todo-item{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:7px;
+  transition:background .15s;}
+.todo-item.done-item{opacity:.55;}
+.todo-item.done-item .todo-text{text-decoration:line-through;color:var(--muted);}
+.todo-chk{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);
+  background:#fff;cursor:pointer;flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:9px;
+  transition:all .15s;}
+.todo-chk.checked{background:var(--blue);border-color:var(--blue);color:#fff;}
+.todo-text{flex:1;font-size:12px;line-height:1.4;word-break:break-word;outline:none;
+  border:none;background:transparent;font-family:'Noto Sans JP',sans-serif;
+  color:var(--text);resize:none;padding:0;min-height:18px;}
+.todo-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:12px;padding:0 2px;line-height:1;flex-shrink:0;opacity:0;transition:opacity .15s;}
+.todo-item:hover .todo-del{opacity:1;}
+.todo-del:hover{color:var(--cat5);}
+.todo-add-row{display:flex;gap:6px;}
+.todo-add-input{flex:1;border:1.5px solid var(--border);border-radius:6px;
+  padding:6px 10px;font-family:'Noto Sans JP',sans-serif;font-size:12px;
+  color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s;}
+.todo-add-input:focus{border-color:var(--blue);}
+.todo-add-btn{background:var(--blue);color:#fff;border:none;border-radius:6px;
+  padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  font-family:'Noto Sans JP',sans-serif;transition:background .15s;}
+.todo-add-btn:hover{background:var(--blue-d);}
+
+/* Slack通知エリア */
+.slack-row{display:flex;align-items:center;gap:7px;margin-top:10px;flex-wrap:wrap;}
+.slack-input-wrap{display:flex;align-items:center;gap:0;flex:1;min-width:0;
+  border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:#fff;}
+.slack-label{font-size:9px;font-weight:700;background:#4a154b;color:#fff;
+  padding:0 8px;height:28px;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;}
+.slack-input{flex:1;border:none;background:transparent;font-size:10px;color:var(--text);
+  outline:none;font-family:'Space Mono',monospace;padding:0 7px;height:28px;min-width:0;}
+.slack-input::placeholder{color:var(--muted);}
+.slack-send-btn{background:#4a154b;color:#fff;border:none;border-radius:7px;
+  padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;height:28px;
+  display:flex;align-items:center;}
+.slack-send-btn:hover:not(:disabled){background:#7c3aed;}
+.slack-send-btn:disabled{opacity:.35;cursor:default;}
+.slack-send-btn.sending{background:#7a7a7a;}
+.slack-send-btn.ok{background:var(--success);}
+.slack-result{font-size:10px;margin-top:5px;min-height:14px;transition:all .3s;}
+
+/* メモ列 */
+.mtg-memo-col{flex:1.4;min-width:240px;display:flex;flex-direction:column;gap:6px;}
+.mtg-memo-title{font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.06em;margin-bottom:2px;display:flex;align-items:center;gap:6px;}
+.mtg-memo-ta{width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 12px;font-family:'Noto Sans JP',sans-serif;font-size:12px;
+  line-height:1.6;resize:vertical;min-height:120px;background:var(--surface2);
+  color:var(--text);outline:none;transition:border-color .2s;}
+.mtg-memo-ta:focus{border-color:var(--blue);}
+.mtg-memo-foot{display:flex;justify-content:space-between;align-items:center;}
+.mtg-memo-meta{font-size:10px;color:var(--muted);}
+.mtg-memo-save{background:var(--blue);color:#fff;border:none;border-radius:6px;
+  padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;transition:background .15s;}
+.mtg-memo-save:hover{background:var(--blue-d);}
+.mtg-memo-save.saved{background:var(--success);}
+.mtg-date-label{font-size:10px;color:var(--muted);background:var(--surface2);
+  border:1px solid var(--border2);border-radius:4px;padding:2px 7px;}
+
+@media(max-width:700px){
+  header,.subhd,.filter-bar,.legend,
+  .edit-banner,.msg-banner,.move-banner,.sync-bar{padding-left:12px;padding-right:12px;}
+  .main{padding:12px 8px 80px;}
+  .hlink-input{width:80px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    CF <span style="color:#60c0ff">//</span> PROGRESS
+    <div class="logo-badge">BETA</div>
+  </div>
+  <div class="hright">
+    <div class="proj-badge" id="projBadge" style="display:none">
+      <div class="proj-badge-dot" id="projDot"></div>
+      <span id="projBadgeLabel"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <div class="gbar-w"><div class="gbar-f" id="gbar" style="width:0%"></div></div>
+      <div class="gbar-l" id="gbarLabel">0%</div>
+    </div>
+    <button class="hbtn" id="editBtn"  onclick="toggleEdit()">✏️ 編集</button>
+    <button class="hbtn" id="moveBtn"  onclick="toggleMove()">🔀 移動</button>
+    <button class="hbtn" onclick="openAddModal()" style="background:#7c3aed;border-color:#7c3aed;color:#fff;">＋ タスク追加</button>
+    <button class="hbtn" onclick="resetCheck()">リセット</button>
+  </div>
+</header>
+
+<div class="sync-bar wait" id="syncBar">
+  <div class="sync-dot"></div>
+  <span id="syncMsg">Firebaseに接続中…</span>
+</div>
+
+<div class="msg-banner"  id="msgBanner"></div>
+<div class="edit-banner" id="editBanner">
+  <strong>✏️ 編集モード ON</strong> — 🖊ボタンでテキスト編集 ／ メモボタンでコメント追加
+</div>
+<div class="move-banner" id="moveBanner">
+  <strong>🔀 移動モード ON</strong> — ◀ ▶ ボタンで週移動、ドラッグでも移動可
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">表示：</span>
+  <button class="fbtn f-all sel" id="f-all"  onclick="setFilter('all')">👥 全員</button>
+  <button class="fbtn f-exec"   id="f-exec" onclick="setFilter('exec')">🟦 実行者様のみ</button>
+  <button class="fbtn f-cons"   id="f-cons" onclick="setFilter('cons')">🟩 スポチュニティのみ</button>
+</div>
+
+<div class="subhd">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="pj-label">プロジェクト名</span>
+    <input class="pj-input" id="projectName" type="text" placeholder="例：〇〇スポーツクラブ" maxlength="30">
+  </div>
+  <div class="stat-chips">
+    <div class="stat-chip"><div class="snum c-acc" id="sPct">0%</div><div class="slbl">全体進捗</div></div>
+    <div class="stat-chip"><div class="snum c-exec" id="sExec">0/0</div><div class="slbl">実行者様</div></div>
+    <div class="stat-chip"><div class="snum c-cons" id="sCons">0/0</div><div class="slbl">スポチュニティ</div></div>
+  </div>
+  <!-- Zoom / Drive リンク（サブヘッダー内） -->
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;">
+    <div class="hlink-wrap" id="hlinkZoom">
+      <span class="hlink-label zoom"><span class="hlink-label-icon">📹</span>Zoom</span>
+      <input class="hlink-input" id="zoomInput" type="url" placeholder="URLを貼り付け…"
+        oninput="onLinkInput('zoom')" onkeydown="if(event.key==='Enter')openLink('zoom')">
+      <button class="hlink-go" id="zoomGo" onclick="openLink('zoom')" disabled title="Zoomを開く">↗</button>
+    </div>
+    <div class="hlink-wrap" id="hlinkDrive">
+      <span class="hlink-label drive"><span class="hlink-label-icon">📁</span>Drive</span>
+      <input class="hlink-input" id="driveInput" type="url" placeholder="URLを貼り付け…"
+        oninput="onLinkInput('drive')" onkeydown="if(event.key==='Enter')openLink('drive')">
+      <button class="hlink-go" id="driveGo" onclick="openLink('drive')" disabled title="Driveを開く">↗</button>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="lgd-item"><div class="ldot" style="background:var(--exec-l);border:1.5px solid #b3d4f0"></div>実行者（未）</div>
+  <div class="lgd-item"><div class="ldot" style="background:var(--exec)"></div>実行者（完了）</div>
+  <div class="lgd-item"><div class="ldot" style="background:var(--cons-l);border:1.5px solid #a0ddd6"></div>スポチュニティ（未）</div>
+  <div class="lgd-item"><div class="ldot" style="background:var(--cons)"></div>スポチュニティ（完了）</div>
+  <div class="lgd-item" style="margin-left:auto;font-size:11px;color:var(--muted)">📌 クリック：チェック ／ ✏️：テキスト編集 ／ 🔀：週移動 ／ 📋タイトル：折りたたみ</div>
+</div>
+
+<div class="no-id-screen" id="noIdScreen">
+  <div class="no-id-icon">🔗</div>
+  <div class="no-id-title">CF // PROGRESS</div>
+
+  <!-- ローディング -->
+  <div id="pwLoadingArea" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin:16px 0;">
+    <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);
+      border-radius:50%;animation:spin .8s linear infinite;"></div>
+    <div style="font-size:12px;color:var(--muted);">接続中…</div>
+  </div>
+
+  <!-- ① パスワード未設定：初回設定画面 -->
+  <div id="pwSetupArea" style="display:none;width:100%;max-width:360px;">
+    <div class="no-id-sub" style="margin-bottom:20px;">管理者パスワードを設定してください。<br><span style="font-size:11px;color:var(--muted);">プロジェクト一覧の表示に使います。</span></div>
+    <div class="pw-input-group">
+      <input class="pw-input" id="pwSetup1" type="password" placeholder="パスワードを入力…" maxlength="64">
+      <input class="pw-input" id="pwSetup2" type="password" placeholder="もう一度入力…" maxlength="64"
+        onkeydown="if(event.key==='Enter')setupPassword()">
+    </div>
+    <div id="pwSetupErr" class="pw-error"></div>
+    <button class="pw-btn" onclick="setupPassword()">設定する</button>
+  </div>
+
+  <!-- ② パスワード設定済み：入力画面 -->
+  <div id="pwLoginArea" style="display:none;width:100%;max-width:360px;">
+    <div class="no-id-sub" style="margin-bottom:20px;">管理者パスワードを入力してください。</div>
+    <div class="pw-input-group">
+      <input class="pw-input" id="pwLogin" type="password" placeholder="パスワードを入力…" maxlength="64"
+        onkeydown="if(event.key==='Enter')loginPassword()">
+    </div>
+    <div id="pwLoginErr" class="pw-error"></div>
+    <button class="pw-btn" onclick="loginPassword()">ログイン</button>
+  </div>
+
+  <!-- ③ 認証済み：メイン操作エリア -->
+  <div id="pwAuthedArea" style="display:none;width:100%;max-width:480px;">
+    <div style="display:flex;gap:8px;margin-bottom:20px;justify-content:center;flex-wrap:wrap;">
+      <button class="no-id-create-btn" onclick="createNewProject()">✨ 新規プロジェクトを作成</button>
+    </div>
+    <div class="no-id-or">または</div>
+    <div class="no-id-manual" style="margin-bottom:16px;">
+      <span style="font-size:12px;color:var(--muted);">既存のIDでアクセス：</span>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <input class="no-id-input" id="manualIdInput" type="text"
+          placeholder="プロジェクトIDを入力…"
+          onkeydown="if(event.key==='Enter')goToProject()">
+        <button class="no-id-go-btn" onclick="goToProject()">移動</button>
+      </div>
+    </div>
+    <!-- プロジェクト一覧 -->
+    <div id="projectListArea" style="display:none;width:100%;text-align:left;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span>📂 最近のプロジェクト</span>
+        <button onclick="changePassword()" style="font-size:10px;background:none;border:1px solid var(--border);
+          border-radius:4px;padding:2px 8px;cursor:pointer;color:var(--muted);font-family:'Noto Sans JP',sans-serif;">
+          🔑 パスワード変更
+        </button>
+      </div>
+      <ul id="projectListUl" style="list-style:none;display:flex;flex-direction:column;gap:4px;"></ul>
+    </div>
+  </div>
+
+  <div class="no-id-note" style="margin-top:16px;">IDは推測されにくいランダム文字列が自動生成されます</div>
+</div>
+
+<div id="mainUI" style="display:none">
+  <div class="main">
+
+    <!-- 日付入力バー -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;
+                padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;
+                gap:18px;flex-wrap:wrap;box-shadow:0 1px 6px #1a6fc408;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:700;color:var(--blue-d);white-space:nowrap;">🚀 公開開始日</span>
+        <input type="date" id="startDateInput"
+          style="border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;
+                 font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;
+                 color:var(--text);background:#fff;outline:none;cursor:pointer;"
+          onchange="onDateChange()">
+      </div>
+      <span style="color:var(--border);font-size:18px;">→</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:700;color:var(--cat5);white-space:nowrap;">🏁 公開終了日</span>
+        <input type="date" id="endDateInput"
+          style="border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;
+                 font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;
+                 color:var(--text);background:#fff;outline:none;cursor:pointer;"
+          onchange="onDateChange()">
+      </div>
+      <div id="durationBadge" style="display:none;background:var(--blue-ll);border:1px solid var(--blue);
+           border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--blue-d);"></div>
+      <span style="font-size:11px;color:var(--muted);">← 両方入力すると全列の日付を自動計算</span>
+      <button onclick="clearAllDates()"
+        style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:5px;
+               font-size:11px;color:var(--muted);cursor:pointer;padding:5px 12px;
+               font-family:'Noto Sans JP',sans-serif;">🗑 日付をクリア</button>
+    </div>
+
+    <!-- フェーズ別進捗バー -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+      <div class="phase-progress-bar">
+        <div class="phase-prog-title">
+          <span>📋 準備フェーズ進捗</span>
+          <span class="phase-prog-pct" id="prog1Pct" style="color:var(--blue);">0%</span>
+        </div>
+        <div class="phase-prog-track">
+          <div class="phase-prog-fill" id="prog1Fill" style="width:0%;background:var(--blue);"></div>
+        </div>
+        <div class="phase-prog-sub" id="prog1Sub">0 / 0 タスク完了</div>
+      </div>
+      <div class="phase-progress-bar">
+        <div class="phase-prog-title">
+          <span>🏁 終了後フェーズ進捗</span>
+          <span class="phase-prog-pct" id="prog2Pct" style="color:var(--cat5);">0%</span>
+        </div>
+        <div class="phase-prog-track">
+          <div class="phase-prog-fill" id="prog2Fill" style="width:0%;background:var(--cat5);"></div>
+        </div>
+        <div class="phase-prog-sub" id="prog2Sub">0 / 0 タスク完了</div>
+      </div>
+    </div>
+
+    <!-- 打ち合わせToDo・メモ（トグル付き） -->
+    <div class="mtg-panel" id="mtgPanel" style="margin-bottom:16px;">
+      <div class="mtg-panel-head" id="mtgPanelHead" onclick="toggleMtgPanel()">
+        <span class="mtg-panel-toggle">▼</span>
+        <span class="mtg-panel-title">📝 打ち合わせメモ・ToDo</span>
+        <span id="mtgTodoBadge" style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;"></span>
+      </div>
+      <div class="mtg-panel-body" id="mtgPanelBody">
+        <!-- ToDo列 -->
+        <div class="mtg-todo-col">
+          <div class="mtg-todo-title">☑️ ToDo</div>
+          <div class="todo-list" id="todoList"></div>
+          <div class="todo-add-row">
+            <input class="todo-add-input" id="todoInput" type="text" placeholder="新しいToDoを追加…"
+              onkeydown="if(event.key==='Enter')addTodo()">
+            <button class="todo-add-btn" onclick="addTodo()">追加</button>
+          </div>
+          <!-- Slack通知エリア -->
+          <div class="slack-row">
+            <div class="slack-input-wrap">
+              <span class="slack-label">🔔 Slack</span>
+              <input class="slack-input" id="slackWebhookInput" type="url"
+                placeholder="Webhook URL を貼り付け…"
+                oninput="onSlackInput()" value="">
+            </div>
+            <button class="slack-send-btn" id="slackSendBtn" onclick="sendSlackNotification()" disabled>
+              未完了を送信
+            </button>
+          </div>
+          <div id="slackResult" class="slack-result"></div>
+        </div>
+        <!-- メモ列 -->
+        <div class="mtg-memo-col">
+          <div class="mtg-memo-title">
+            📄 メモ
+            <span class="mtg-date-label" id="mtgMemoDate"></span>
+          </div>
+          <textarea class="mtg-memo-ta" id="mtgMemoTa"
+            placeholder="打ち合わせの議事録、決定事項、連絡事項など…"
+            oninput="onMtgMemoInput()"></textarea>
+          <div class="mtg-memo-foot">
+            <span class="mtg-memo-meta" id="mtgMemoMeta"></span>
+            <button class="mtg-memo-save" id="mtgMemoSave" onclick="saveMtgMemo()">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 準備フェーズ（トグル付き） -->
+    <div class="section-title" id="sec1Title" style="color:var(--blue-d);" onclick="toggleSection(1)">
+      <span class="toggle-icon">▼</span>
+      📋 プロジェクト準備フェーズ（〜公開）
+    </div>
+    <div class="section-body" id="sec1Body">
+      <div class="tbl-wrap">
+        <table>
+          <colgroup>
+            <col class="col-cat"><col class="col-role">
+            <col class="col-week"><col class="col-week"><col class="col-week"><col class="col-week">
+            <col class="col-week"><col class="col-week"><col class="col-week"><col class="col-start">
+          </colgroup>
+          <thead><tr id="thead1"></tr></thead>
+          <tbody id="tbody1"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 終了後フェーズ（トグル付き） -->
+    <div class="section-title" id="sec2Title" style="color:var(--cat5);margin-top:36px;" onclick="toggleSection(2)">
+      <span class="toggle-icon">▼</span>
+      🏁 プロジェクト終了後（精算・リターン実施）
+    </div>
+    <div class="section-body" id="sec2Body">
+      <div class="tbl-wrap">
+        <table>
+          <colgroup>
+            <col class="col-cat"><col class="col-role">
+            <col class="col-post"><col class="col-post"><col class="col-post"><col class="col-post">
+          </colgroup>
+          <thead><tr id="thead2"></tr></thead>
+          <tbody id="tbody2"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
+
+<!-- タスク追加モーダル -->
+<div class="overlay" id="addOverlay" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal" style="width:min(500px,94vw);">
+    <div class="modal-head">
+      <div class="modal-title" style="font-size:15px;font-weight:900;">➕ タスクを追加</div>
+      <button class="modal-x" onclick="closeAddModal()">✕</button>
+    </div>
+
+    <!-- フェーズ切り替えタブ -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button id="addTab1" onclick="switchAddPhase(1)"
+        style="flex:1;padding:8px;border-radius:7px;border:2px solid var(--blue);
+               background:var(--blue);color:#fff;font-weight:700;font-size:12px;
+               cursor:pointer;font-family:'Noto Sans JP',sans-serif;">
+        📋 準備フェーズ
+      </button>
+      <button id="addTab2" onclick="switchAddPhase(2)"
+        style="flex:1;padding:8px;border-radius:7px;border:2px solid var(--border);
+               background:var(--bg);color:var(--muted);font-weight:700;font-size:12px;
+               cursor:pointer;font-family:'Noto Sans JP',sans-serif;">
+        🏁 終了後フェーズ
+      </button>
+    </div>
+
+    <!-- タスク名 -->
+    <div class="add-form-row">
+      <div class="add-form-label">タスク名</div>
+      <textarea class="add-form-ta" id="addText" rows="2"
+        placeholder="例：SNS告知用の画像を準備する"></textarea>
+    </div>
+
+    <!-- 担当 / タイミング -->
+    <div class="add-form-row-h">
+      <div class="add-form-row">
+        <div class="add-form-label">担当</div>
+        <select class="add-form-select" id="addRole" onchange="updateAddHint()">
+          <option value="exec">実行者様</option>
+          <option value="cons">スポチュニティ</option>
+        </select>
+      </div>
+      <div class="add-form-row">
+        <div class="add-form-label">タイミング（週）</div>
+        <select class="add-form-select" id="addWeek" onchange="updateAddHint()"></select>
+      </div>
+    </div>
+
+    <!-- 追加先プレビュー -->
+    <div class="add-target-hint" id="addTargetHint">📍 追加先：</div>
+
+    <div class="modal-foot" style="margin-top:18px;">
+      <button class="btn btn-cancel" onclick="closeAddModal()">キャンセル</button>
+      <button class="btn btn-save" onclick="submitAddTask()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- メモモーダル -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-label" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>メモ・コメント</span>
+      <button onclick="toggleMemoPreview()" id="memoPreviewToggle"
+        style="font-size:10px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:4px;padding:3px 8px;cursor:pointer;color:var(--muted);
+               font-family:'Noto Sans JP',sans-serif;">🔗 プレビュー</button>
+    </div>
+    <textarea class="modal-ta" id="modalTa" placeholder="進捗状況、懸念点、連絡事項など…
+URLを貼るとリンクになります"></textarea>
+    <div id="modalPreview" style="display:none;border:1.5px solid var(--border);border-radius:8px;
+      padding:10px 12px;min-height:80px;font-size:12px;line-height:1.8;
+      background:var(--surface2);word-break:break-word;white-space:pre-wrap;"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-foot">
+      <button class="btn btn-del" id="btnDel" onclick="deleteMemo()">削除</button>
+      <button class="btn btn-cancel" onclick="closeModal()">閉じる</button>
+      <button class="btn btn-save" onclick="saveMemo()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+/* ── ランダムID生成 ── */
+function generateRandomId(){
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+  let id = 'cf-';
+  for(let i=0;i<10;i++) id += chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+
+/* ── プロジェクト一覧（localStorage） ── */
+const PROJECTS_KEY = 'cf_projects_list';
+function loadProjectsList(){ try{ return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]'); }catch(e){ return []; } }
+function saveProjectsList(list){ try{ localStorage.setItem(PROJECTS_KEY, JSON.stringify(list)); }catch(e){} }
+/* ── パスワード管理 ── */
+const PW_KEY = 'cf_admin_pw_hash';
+const PW_SESSION_KEY = 'cf_admin_authed';
+let adminPwRef = null;
+let adminDb = null, adminListRef = null; // 一覧管理用
+
+async function hashPassword(pw){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw + 'cf_salt_2024'));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// FirebaseからPWハッシュを取得してlocalにキャッシュ
+async function syncPasswordFromFirebase(){
+  if(!db) return false;
+  try{
+    adminPwRef = ref(db, 'admin/pw_hash');
+    const snapshot = await Promise.race([
+      get(adminPwRef),
+      new Promise((_,reject) => setTimeout(()=>reject(new Error('timeout')), 1200))
+    ]);
+    const remoteHash = snapshot.val();
+    if(remoteHash) localStorage.setItem(PW_KEY, remoteHash);
+    return !!remoteHash;
+  } catch(e){
+    console.warn('PW sync failed or timed out:', e);
+    return false;
+  }
+}
+
+function isPasswordSet(){ return !!localStorage.getItem(PW_KEY); }
+function isAuthed(){ return sessionStorage.getItem(PW_SESSION_KEY)==='1'; }
+function setAuthed(){ sessionStorage.setItem(PW_SESSION_KEY,'1'); }
+
+async function setupPassword(){
+  const p1 = document.getElementById('pwSetup1').value;
+  const p2 = document.getElementById('pwSetup2').value;
+  const err = document.getElementById('pwSetupErr');
+  if(!p1){ err.textContent='パスワードを入力してください'; return; }
+  if(p1.length < 4){ err.textContent='4文字以上で設定してください'; return; }
+  if(p1 !== p2){ err.textContent='パスワードが一致しません'; return; }
+  const hash = await hashPassword(p1);
+  localStorage.setItem(PW_KEY, hash);
+  // Firebaseにも保存（全員共有）
+  if(db){
+    adminPwRef = adminPwRef || ref(db, 'admin/pw_hash');
+    await set(adminPwRef, hash).catch(e=>console.warn('PW save failed:', e));
+  }
+  setAuthed(); err.textContent=''; showAuthedArea();
+}
+window.setupPassword = setupPassword;
+
+async function loginPassword(){
+  const p = document.getElementById('pwLogin').value;
+  const err = document.getElementById('pwLoginErr');
+  if(!p){ err.textContent='パスワードを入力してください'; return; }
+  const hash = await hashPassword(p);
+  if(hash === localStorage.getItem(PW_KEY)){
+    setAuthed(); err.textContent=''; showAuthedArea();
+  } else {
+    err.textContent='パスワードが違います';
+    document.getElementById('pwLogin').value='';
+    document.getElementById('pwLogin').focus();
+  }
+}
+window.loginPassword = loginPassword;
+
+window.changePassword = async function(){
+  const cur = prompt('現在のパスワードを入力してください：');
+  if(cur===null) return;
+  const curHash = await hashPassword(cur);
+  if(curHash !== localStorage.getItem(PW_KEY)){ alert('パスワードが違います'); return; }
+  const n1 = prompt('新しいパスワードを入力してください：');
+  if(!n1||n1.length<4){ alert('4文字以上で設定してください'); return; }
+  const n2 = prompt('もう一度入力してください：');
+  if(n1 !== n2){ alert('パスワードが一致しません'); return; }
+  const newHash = await hashPassword(n1);
+  localStorage.setItem(PW_KEY, newHash);
+  if(db){
+    adminPwRef = adminPwRef || ref(db, 'admin/pw_hash');
+    await set(adminPwRef, newHash).catch(e=>console.warn('PW update failed:', e));
+  }
+  alert('パスワードを変更しました');
+};
+
+function showAuthedArea(){
+  document.getElementById('pwSetupArea').style.display='none';
+  document.getElementById('pwLoginArea').style.display='none';
+  document.getElementById('pwAuthedArea').style.display='block';
+  renderProjectsList();
+}
+
+async function initPasswordScreen(){
+  const loading = document.getElementById('pwLoadingArea');
+
+  // まずローディングを即座に隠して画面を出す
+  if(loading) loading.style.display = 'none';
+
+  if(!isPasswordSet()){
+    document.getElementById('pwSetupArea').style.display='block';
+  } else if(isAuthed()){
+    showAuthedArea();
+  } else {
+    document.getElementById('pwLoginArea').style.display='block';
+    setTimeout(()=>document.getElementById('pwLogin').focus(), 100);
+  }
+
+  // バックグラウンドでFirebaseからPWを同期（画面表示後に実行）
+  setTimeout(async ()=>{
+    try{
+      const app = initializeApp({
+        apiKey:            "AIzaSyATNt_dr9dqWSB2hOY3FkdSHsQww8TQD3w",
+        authDomain:        "spportunity-dashboard.firebaseapp.com",
+        projectId:         "spportunity-dashboard",
+        storageBucket:     "spportunity-dashboard.firebasestorage.app",
+        messagingSenderId: "559544666626",
+        appId:             "1:559544666626:web:a67dd8398377613c55b51b",
+        databaseURL:       "https://spportunity-dashboard-default-rtdb.firebaseio.com",
+      }, 'cf-home-' + Date.now());
+      db = getDatabase(app);
+      initAdminFirebase();
+      await syncPasswordFromFirebase();
+      // PWが新たに取得できて未認証なら入力画面に切り替え
+      if(isPasswordSet() && !isAuthed()){
+        document.getElementById('pwSetupArea').style.display='none';
+        document.getElementById('pwLoginArea').style.display='block';
+        setTimeout(()=>document.getElementById('pwLogin').focus(), 100);
+      }
+    } catch(e){ console.warn('Background Firebase init failed:', e); }
+  }, 100);
+}
+
+
+window.createNewProject = function(){
+  const newId = generateRandomId();
+  registerProject(newId, '');
+  const url = new URL(window.location.href);
+  url.searchParams.set('id', newId);
+  window.location.href = url.toString();
+};
+window.goToProject = function(){
+  const input = document.getElementById('manualIdInput');
+  const val = (input.value||'').trim().replace(/[^a-zA-Z0-9\-_]/g,'');
+  if(!val){ input.focus(); return; }
+  registerProject(val, '');
+  const url = new URL(window.location.href);
+  url.searchParams.set('id', val);
+  window.location.href = url.toString();
+};
+const urlParams  = new URLSearchParams(window.location.search);
+const PROJECT_ID = (urlParams.get('id') || '').trim().replace(/[^a-zA-Z0-9\-_]/g, '');
+
+if(!PROJECT_ID){
+  document.getElementById('noIdScreen').classList.add('show');
+  document.getElementById('syncBar').style.display = 'none';
+  initPasswordScreen();
+} else {
+  document.getElementById('mainUI').style.display = 'block';
+  const badge = document.getElementById('projBadge');
+  badge.style.display = 'flex';
+  document.getElementById('projBadgeLabel').textContent = `ID: ${PROJECT_ID}`;
+  registerProject(PROJECT_ID, '');
+}
+
+/* ── データ定義 ── */
+const CATS1 = [
+  {
+    id:'kikaku', name:'企画骨子', cv:'var(--cat2)', cc:'cat-2', bg:'cc-2',
+    rows:[
+      { role:'exec', tasks:[
+        { week:1, text:'契約/実行者登録\nタイトル/資金使途\n目標金額/KV画像', id:'k_e_0' },
+        { week:4, text:'キービジュアル\nご提案への確認・修正', id:'k_e_4' },
+      ]},
+      { role:'cons', tasks:[
+        { week:1, text:'実行者手順書\n独自機能のご説明', id:'k_c_0' },
+        { week:3, text:'キービジュアル\nご提案', id:'k_c_3' },
+        { week:6, text:'ページ公開', id:'k_c_6' },
+      ]},
+    ]
+  },
+  {
+    id:'appeal', name:'アピール文', cv:'var(--cat1)', cc:'cat-1', bg:'cc-1',
+    rows:[
+      { role:'exec', tasks:[
+        { week:1, text:'画像等の素材準備', id:'a_e_0' },
+        { week:3, text:'情報提供・\nドラフト文作成', id:'a_e_2', span:1 },
+        { week:5, text:'確定', id:'a_e_3' },
+      ]},
+      { role:'cons', tasks:[
+        { week:3, text:'助言・清書', id:'a_c_2', span:1 },
+        { week:5, text:'ページ\n登録完了', id:'a_c_4' },
+        { week:6, text:'プレスリリース\n配信', id:'a_c_6' },
+      ]},
+    ]
+  },
+  {
+    id:'return1', name:'リターン', cv:'var(--cat3)', cc:'cat-3', bg:'cc-3',
+    rows:[
+      { role:'exec', tasks:[
+        { week:0, text:'想定\n支援者', id:'r_e_x' },
+        { week:1, text:'リターン案\n商品情報・素材提供', id:'r_e_1', span:2 },
+        { week:4, text:'確定', id:'r_e_3' },
+      ]},
+      { role:'cons', tasks:[
+        { week:2, text:'助言・清書', id:'r_c_1', span:1 },
+        { week:4, text:'ページ\n登録完了', id:'r_c_4' },
+      ]},
+    ]
+  },
+  {
+    id:'promo', name:'プロモーション', cv:'var(--cat4)', cc:'cat-4', bg:'cc-4',
+    rows:[
+      { role:'exec', tasks:[
+        { week:1, text:'プロモーション\nシート入力', id:'p_e_0' },
+        { week:3, text:'HP、メルマガ、SNS等の投稿準備\n（投稿文準備、動画撮影等、\nインフルエンサーやマスメディア打診）', id:'p_e_2', span:2 },
+        { week:6, text:'事前PR、開始後PR\n"地上戦"の実施', id:'p_e_5' },
+      ]},
+      { role:'cons', tasks:[
+        { week:0, text:'プロモの重要性等の\nご説明、コラム案内', id:'p_c_x', span:1 },
+        { week:2, text:'計画\nご提案', id:'p_c_1' },
+        { week:3, text:'プレスリリース(PRTIMES) ドラフト作成&発信\nプロモの準備&実施のモニタリング、適宜サポート', id:'p_c_2', span:4 },
+      ]},
+    ]
+  },
+];
+
+const CATS2 = [
+  {
+    id:'thanks', name:'支援者への\nお礼', cv:'var(--cat5)', cc:'cat-5', bg:'cc-5',
+    rows:[
+      { role:'exec', tasks:[
+        { week:0, text:'SNS・HPに支援への\nお礼メッセージを掲載', id:'th_e_0' },
+        { week:1, text:'支援募集ページの\n「コミュニティ」欄に投稿\n（支援者全員にメール通知）', id:'th_e_1' },
+      ]},
+      { role:'cons', tasks:[
+        { week:0, text:'実行者アンケート\n送付', id:'th_c_0' },
+        { week:1, text:'振り返り\nミーティング', id:'th_c_1' },
+        { week:1, text:'オリジナルリターン\nの対応', id:'th_c_1b' },
+      ]},
+    ]
+  },
+  {
+    id:'collab', name:'協力者への\n御礼', cv:'var(--cat5)', cc:'cat-5', bg:'cc-5',
+    rows:[
+      { role:'exec', tasks:[
+        { week:0, text:'インフルエンサー・ファン・\n身の回りの方々への\n御礼メッセージを送付', id:'cl_e_0' },
+        { week:1, text:'紹介機能・拡散\nキャンペーン特典をお渡し', id:'cl_e_1' },
+      ]},
+    ]
+  },
+  {
+    id:'return2', name:'リターンの\n実施', cv:'var(--cat5)', cc:'cat-5', bg:'cc-5',
+    rows:[
+      { role:'exec', tasks:[
+        { week:1, text:'設定期日までに\nリターンを実施\n（遅れる場合は事前に案内）', id:'rt_e_0' },
+        { week:2, text:'お礼状を同封し\n感謝の気持ちを伝える', id:'rt_e_1' },
+      ]},
+      { role:'cons', tasks:[
+        { week:3, text:'支援金精算', id:'rt_c_3' },
+        { week:3, text:'ドライブの\n待避', id:'rt_c_3b' },
+      ]},
+    ]
+  },
+  {
+    id:'report', name:'資金使途の\n報告', cv:'var(--cat5)', cc:'cat-5', bg:'cc-5',
+    rows:[
+      { role:'exec', tasks:[
+        { week:2, text:'支援金の使途をSNS・\nHP・支援者コミュニティ\nなどで報告', id:'rp_e_0' },
+      ]},
+    ]
+  },
+];
+
+const MESSAGES = [
+  { pct:100, emoji:'🎉', msg:'全タスク完走おめでとう！', bg:'#edfaf4', bc:'#18a06a', tc:'#0d5c3a' },
+  { pct: 75, emoji:'🔥', msg:'あと一息！ゴールが見えてきました！', bg:'#fff4f8', bc:'#e05a8a', tc:'#7a1a3a' },
+  { pct: 50, emoji:'⚡', msg:'折り返し地点！この調子で突き進もう！', bg:'#fffde7', bc:'#e8a020', tc:'#6a4500' },
+  { pct: 25, emoji:'🚀', msg:'スタートダッシュ順調！よくここまで来ました！', bg:'var(--blue-ll)', bc:'var(--blue)', tc:'var(--blue-d)' },
+  { pct:  1, emoji:'👋', msg:'タスクを一つずつ確実に進めましょう！', bg:'var(--bg)', bc:'var(--border)', tc:'var(--muted)' },
+];
+
+/* ── 状態管理 ── */
+const LOCAL_KEY = `cf_v10_${PROJECT_ID}`;
+const EMPTY_STATE = () => ({
+  done:{}, pname:'', texts:{}, memos:{},
+  dates1:{}, dates2:{}, weeks:{}, startDate:'', endDate:'',
+  customTasks:[], zoomUrl:'', driveUrl:'',
+  collapsed:{}, hidden:{},
+  todos:[], mtgMemo:'', mtgMemoUpdated:'', slackWebhookUrl:''
+});
+function loadLocal(){
+  try{ const r=localStorage.getItem(LOCAL_KEY); return r?JSON.parse(r):EMPTY_STATE(); }
+  catch(e){ return EMPTY_STATE(); }
+}
+function saveLocal(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(S));}catch(e){} }
+
+let S = loadLocal();
+['done','texts','memos','dates1','dates2','weeks','collapsed','hidden'].forEach(k=>{ if(!S[k]) S[k]={}; });
+if(!Array.isArray(S.customTasks)) S.customTasks = [];
+if(!Array.isArray(S.todos)) S.todos = [];
+if(!S.zoomUrl) S.zoomUrl = '';
+if(!S.driveUrl) S.driveUrl = '';
+if(!S.mtgMemo) S.mtgMemo = '';
+if(!S.mtgMemoUpdated) S.mtgMemoUpdated = '';
+if(!S.slackWebhookUrl) S.slackWebhookUrl = '';
+
+/* ── Firebase ── */
+let db=null, dbRef=null, isRemoteUpdate=false;
+/* ── admin用Firebase（メインdbが初期化後に設定） ── */
+function initAdminFirebase(){
+  // メインのdbが使えれば相乗り、なければスキップ
+  if(db){
+    adminDb = db;
+    adminListRef = ref(db, 'admin/projects_index');
+  }
+}
+
+function pushProjectsToFirebase(list){
+  if(!adminListRef) return;
+  const data = {};
+  list.forEach(p=>{ data[p.id.replace(/[^a-zA-Z0-9_]/g,'_')] = { id:p.id, name:p.name||p.id, updatedAt:p.updatedAt, createdAt:p.createdAt }; });
+  set(adminListRef, data).catch(e=>console.warn('Admin push failed:', e));
+}
+
+function registerProject(id, name){
+  const list = loadProjectsList();
+  const idx = list.findIndex(p=>p.id===id);
+  if(idx>=0){ if(name) list[idx].name=name; list[idx].updatedAt=Date.now(); }
+  else { list.unshift({ id, name:name||id, createdAt:Date.now(), updatedAt:Date.now() }); }
+  saveProjectsList(list);
+  pushProjectsToFirebase(list);
+}
+
+function renderProjectsList(){
+  const el = document.getElementById('projectListArea');
+  if(!el) return;
+  // まずlocalStorageの一覧を即座に表示
+  renderList(loadProjectsList());
+  // Firebaseが使えれば追加でマージ
+  if(adminListRef){
+    get(adminListRef).then(snapshot=>{
+      try{
+        const remote = snapshot.val();
+        if(remote){
+          const remoteList = Object.values(remote).sort((a,b)=>b.updatedAt-a.updatedAt);
+          const localList = loadProjectsList();
+          remoteList.forEach(rp=>{
+            if(!localList.find(lp=>lp.id===rp.id)) localList.push(rp);
+          });
+          localList.sort((a,b)=>b.updatedAt-a.updatedAt);
+          saveProjectsList(localList);
+          renderList(localList);
+        }
+      } catch(e){ console.warn('renderProjectsList merge error:', e); }
+    }).catch(e=>console.warn('Firebase list fetch failed:', e));
+  }
+}
+
+function renderList(list){
+  const el = document.getElementById('projectListArea');
+  if(!el) return;
+  if(!list.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  const ul = document.getElementById('projectListUl');
+  ul.innerHTML='';
+  list.slice(0,30).forEach(p=>{
+    const date = new Date(p.updatedAt);
+    const dateStr = `${date.getMonth()+1}/${date.getDate()}`;
+    const li = document.createElement('li');
+    li.className='proj-list-item';
+    li.innerHTML=`
+      <a class="proj-list-link" href="?id=${encodeURIComponent(p.id)}">
+        <span class="proj-list-name">${p.name||p.id}</span>
+        <span class="proj-list-id">${p.id}</span>
+      </a>
+      <span class="proj-list-date">${dateStr}</span>
+      <button class="proj-list-del" onclick="deleteProjectFromList('${p.id}',event)" title="一覧から削除">✕</button>`;
+    ul.appendChild(li);
+  });
+}
+
+function initFirebase(){
+  try{
+    setSyncStatus('wait','Firebaseに接続中…');
+    const app = initializeApp({
+      apiKey:            "AIzaSyATNt_dr9dqWSB2hOY3FkdSHsQww8TQD3w",
+      authDomain:        "spportunity-dashboard.firebaseapp.com",
+      projectId:         "spportunity-dashboard",
+      storageBucket:     "spportunity-dashboard.firebasestorage.app",
+      messagingSenderId: "559544666626",
+      appId:             "1:559544666626:web:a67dd8398377613c55b51b",
+      databaseURL:       "https://spportunity-dashboard-default-rtdb.firebaseio.com",
+    }, 'cf-app-' + Date.now());
+    db    = getDatabase(app);
+    dbRef = ref(db, `projects/${PROJECT_ID}`);
+    onValue(dbRef, snapshot => {
+      const remote = snapshot.val();
+      if(!remote){ setSyncStatus('ok',`🟢 同期中 — projects/${PROJECT_ID}（新規）`); return; }
+      isRemoteUpdate = true;
+      const prevDone = {...(S.done||{})};
+      S.done      = remote.done      || {};
+      S.texts     = remote.texts     || {};
+      S.memos     = remote.memos     || {};
+      S.weeks     = remote.weeks     || {};
+      S.dates1    = remote.dates1    || {};
+      S.dates2    = remote.dates2    || {};
+      S.collapsed = remote.collapsed || {};
+      S.hidden    = remote.hidden    || {};
+      if(remote.pname)       S.pname       = remote.pname;
+      if(remote.startDate)   S.startDate   = remote.startDate;
+      if(remote.endDate)     S.endDate     = remote.endDate;
+      if(remote.customTasks) S.customTasks = remote.customTasks;
+      if(remote.zoomUrl  !== undefined) S.zoomUrl  = remote.zoomUrl;
+      if(remote.driveUrl !== undefined) S.driveUrl = remote.driveUrl;
+      if(remote.todos    !== undefined) S.todos    = remote.todos || [];
+      if(remote.mtgMemo  !== undefined) S.mtgMemo  = remote.mtgMemo || '';
+      if(remote.mtgMemoUpdated !== undefined) S.mtgMemoUpdated = remote.mtgMemoUpdated || '';
+      if(remote.slackWebhookUrl !== undefined) S.slackWebhookUrl = remote.slackWebhookUrl || '';
+      saveLocal();
+      rebuildAll();
+      Object.keys(S.done).forEach(id => {
+        if(!!S.done[id] !== !!prevDone[id]){
+          const card = document.getElementById(`card-${id}`);
+          if(card){ card.classList.remove('synced-flash'); void card.offsetWidth; card.classList.add('synced-flash'); }
+        }
+      });
+      isRemoteUpdate = false;
+      setSyncStatus('ok',`🟢 同期中 — projects/${PROJECT_ID}`);
+      document.getElementById('projDot').style.background='var(--success)';
+      // admin一覧用refも設定
+      if(!adminListRef){ adminDb=db; adminListRef=ref(db,'admin/projects_index'); }
+      const pname = S.pname || '';
+      registerProject(PROJECT_ID, pname);
+    }, err => setSyncStatus('ng','🔴 接続エラー：'+err.message));
+  } catch(e){ setSyncStatus('ng','🔴 接続失敗：'+e.message); }
+}
+
+function pushToFirebase(){
+  if(!db||!dbRef) return;
+  set(dbRef,{
+    done:S.done, texts:S.texts, memos:S.memos, weeks:S.weeks,
+    dates1:S.dates1, dates2:S.dates2, pname:S.pname,
+    startDate:S.startDate, endDate:S.endDate,
+    customTasks:S.customTasks, collapsed:S.collapsed,
+    hidden:S.hidden,
+    zoomUrl:S.zoomUrl, driveUrl:S.driveUrl,
+    todos:S.todos, mtgMemo:S.mtgMemo, mtgMemoUpdated:S.mtgMemoUpdated,
+    slackWebhookUrl:S.slackWebhookUrl,
+    updatedAt:Date.now(),
+  }).catch(e=>setSyncStatus('ng','🔴 書き込みエラー：'+e.message));
+}
+
+function setSyncStatus(type,msg){
+  const bar=document.getElementById('syncBar');
+  bar.className=`sync-bar ${type}`;
+  document.getElementById('syncMsg').textContent=msg;
+}
+function save(){ saveLocal(); if(!isRemoteUpdate) pushToFirebase(); }
+
+/* ── リンクバー ── */
+window.onLinkInput = function(type){
+  const input = document.getElementById(type==='zoom'?'zoomInput':'driveInput');
+  const btn   = document.getElementById(type==='zoom'?'zoomGo':'driveGo');
+  const val   = (input.value||'').trim();
+  btn.disabled = !val;
+  if(type==='zoom')  S.zoomUrl  = val;
+  else               S.driveUrl = val;
+  save();
+};
+window.openLink = function(type){
+  const val = type==='zoom' ? S.zoomUrl : S.driveUrl;
+  if(val) window.open(val, '_blank');
+};
+function initLinkBar(){
+  const zi = document.getElementById('zoomInput');
+  const di = document.getElementById('driveInput');
+  if(zi){ zi.value = S.zoomUrl||''; document.getElementById('zoomGo').disabled = !S.zoomUrl; }
+  if(di){ di.value = S.driveUrl||''; document.getElementById('driveGo').disabled = !S.driveUrl; }
+}
+
+/* ── トグル（フェーズ） ── */
+window.toggleSection = function(num){
+  const key = `sec${num}`;
+  S.collapsed[key] = !S.collapsed[key];
+  save();
+  applyCollapse(num);
+};
+function applyCollapse(num){
+  const key = `sec${num}`;
+  const title = document.getElementById(`sec${num}Title`);
+  const body  = document.getElementById(`sec${num}Body`);
+  if(!title||!body) return;
+  // 初回（undefinedの場合）はデフォルト折りたたみ
+  const collapsed = S.collapsed[key] !== false;
+  title.classList.toggle('collapsed', collapsed);
+  body.classList.toggle('collapsed', collapsed);
+}
+
+/* ── 打ち合わせパネル トグル ── */
+let mtgPanelOpen = false;
+window.toggleMtgPanel = function(){
+  mtgPanelOpen = !mtgPanelOpen;
+  applyMtgPanel();
+  if(!S.collapsed) S.collapsed={};
+  S.collapsed['mtg'] = !mtgPanelOpen;
+  save();
+};
+function applyMtgPanel(){
+  const head = document.getElementById('mtgPanelHead');
+  const body = document.getElementById('mtgPanelBody');
+  if(!head||!body) return;
+  head.classList.toggle('open', mtgPanelOpen);
+  body.classList.toggle('open', mtgPanelOpen);
+}
+function initMtgPanel(){
+  // デフォルト折りたたみ（collapsed.mtg が false のときだけ開く）
+  mtgPanelOpen = S.collapsed['mtg'] === false;
+  applyMtgPanel();
+  renderTodoList();
+  renderMtgMemo();
+  // Slack URL復元
+  const si = document.getElementById('slackWebhookInput');
+  if(si){ si.value = S.slackWebhookUrl||''; }
+  const btn = document.getElementById('slackSendBtn');
+  if(btn) btn.disabled = !S.slackWebhookUrl;
+}
+
+/* ── ToDo ── */
+function renderTodoList(){
+  const list = document.getElementById('todoList');
+  if(!list) return;
+  list.innerHTML = '';
+  const todos = S.todos || [];
+  todos.forEach((todo, i) => {
+    const item = document.createElement('div');
+    item.className = `todo-item${todo.done?' done-item':''}`;
+
+    const chk = document.createElement('div');
+    chk.className = `todo-chk${todo.done?' checked':''}`;
+    chk.textContent = todo.done ? '✓' : '';
+    chk.onclick = () => toggleTodo(i);
+
+    const txt = document.createElement('textarea');
+    txt.className = 'todo-text';
+    txt.value = todo.text;
+    txt.rows = 1;
+    txt.style.height = 'auto';
+    txt.onchange = () => { S.todos[i].text = txt.value.trim(); save(); };
+    txt.oninput = () => { txt.style.height='auto'; txt.style.height=txt.scrollHeight+'px'; };
+    // 初期高さ
+    setTimeout(()=>{ txt.style.height='auto'; txt.style.height=txt.scrollHeight+'px'; }, 0);
+
+    const del = document.createElement('button');
+    del.className = 'todo-del';
+    del.textContent = '✕';
+    del.onclick = () => deleteTodo(i);
+
+    item.appendChild(chk);
+    item.appendChild(txt);
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+  updateTodoBadge();
+}
+function updateTodoBadge(){
+  const badge = document.getElementById('mtgTodoBadge');
+  if(!badge) return;
+  const todos = S.todos || [];
+  const done = todos.filter(t=>t.done).length;
+  badge.textContent = todos.length ? `${done}/${todos.length} 完了` : '';
+}
+function toggleTodo(i){
+  if(!S.todos[i]) return;
+  S.todos[i].done = !S.todos[i].done;
+  save();
+  renderTodoList();
+}
+function deleteTodo(i){
+  S.todos.splice(i, 1);
+  save();
+  renderTodoList();
+}
+window.addTodo = function(){
+  const input = document.getElementById('todoInput');
+  const text = (input.value||'').trim();
+  if(!text) return;
+  if(!S.todos) S.todos=[];
+  S.todos.push({ text, done:false, createdAt:Date.now() });
+  input.value = '';
+  save();
+  renderTodoList();
+};
+
+/* ── 打ち合わせメモ ── */
+let mtgMemoTimer = null;
+function renderMtgMemo(){
+  const ta = document.getElementById('mtgMemoTa');
+  const dateEl = document.getElementById('mtgMemoDate');
+  const metaEl = document.getElementById('mtgMemoMeta');
+  if(!ta) return;
+  ta.value = S.mtgMemo || '';
+  if(dateEl) dateEl.textContent = S.mtgMemoUpdated ? `最終更新：${S.mtgMemoUpdated}` : '';
+  if(metaEl) metaEl.textContent = ta.value.length ? `${ta.value.length}文字` : '';
+}
+window.onMtgMemoInput = function(){
+  const ta = document.getElementById('mtgMemoTa');
+  const metaEl = document.getElementById('mtgMemoMeta');
+  const saveBtn = document.getElementById('mtgMemoSave');
+  if(metaEl) metaEl.textContent = ta.value.length ? `${ta.value.length}文字` : '';
+  if(saveBtn){ saveBtn.classList.remove('saved'); saveBtn.textContent='保存'; }
+  // 3秒後に自動保存
+  clearTimeout(mtgMemoTimer);
+  mtgMemoTimer = setTimeout(()=>saveMtgMemo(true), 3000);
+};
+window.saveMtgMemo = function(auto=false){
+  const ta = document.getElementById('mtgMemoTa');
+  const saveBtn = document.getElementById('mtgMemoSave');
+  const dateEl = document.getElementById('mtgMemoDate');
+  if(!ta) return;
+  S.mtgMemo = ta.value;
+  const now = new Date();
+  S.mtgMemoUpdated = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  save();
+  if(dateEl) dateEl.textContent = `最終更新：${S.mtgMemoUpdated}`;
+  if(saveBtn&&!auto){ saveBtn.classList.add('saved'); saveBtn.textContent='✓ 保存済'; setTimeout(()=>{ saveBtn.classList.remove('saved'); saveBtn.textContent='保存'; },1500); }
+};
+
+/* ── Slack通知 ── */
+window.onSlackInput = function(){
+  const input = document.getElementById('slackWebhookInput');
+  const btn   = document.getElementById('slackSendBtn');
+  const val   = (input.value||'').trim();
+  S.slackWebhookUrl = val;
+  save();
+  if(btn) btn.disabled = !val;
+};
+
+window.sendSlackNotification = async function(){
+  const url = S.slackWebhookUrl;
+  if(!url){ return; }
+  const todos = (S.todos||[]).filter(t=>!t.done);
+  const btn    = document.getElementById('slackSendBtn');
+  const result = document.getElementById('slackResult');
+
+  if(todos.length === 0){
+    result.style.color = 'var(--success)';
+    result.textContent = '✅ 未完了のToDoはありません！';
+    return;
+  }
+
+  // メッセージ組み立て
+  const pname = S.pname || PROJECT_ID;
+  const lines = todos.map(t=>`• ${t.text}`).join('\n');
+  const text = `📋 *${pname}* の未完了ToDo（${todos.length}件）\n${lines}`;
+
+  btn.disabled = true;
+  btn.classList.add('sending');
+  btn.textContent = '送信中…';
+  result.textContent = '';
+
+  try{
+    // Slack Webhookへ送信（CORSのためno-corsを使用）
+    await fetch(url, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text }),
+    });
+    btn.classList.remove('sending');
+    btn.classList.add('ok');
+    btn.textContent = '✓ 送信完了';
+    result.style.color = 'var(--success)';
+    result.textContent = `未完了ToDo ${todos.length}件をSlackに送信しました`;
+    setTimeout(()=>{
+      btn.classList.remove('ok');
+      btn.textContent = '未完了を送信';
+      btn.disabled = !S.slackWebhookUrl;
+      result.textContent = '';
+    }, 3000);
+  } catch(e){
+    btn.classList.remove('sending');
+    btn.textContent = '未完了を送信';
+    btn.disabled = false;
+    result.style.color = 'var(--cat5)';
+    result.textContent = '⚠️ 送信エラー：URLを確認してください';
+  }
+};
+function allTasks(){
+  const a=[];
+  CATS1.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>{
+    if(!(S.hidden||{})[t.id]) a.push({id:t.id,role:r.role,cat:c.id,def:t.text,phase:1});
+  })));
+  CATS2.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>{
+    if(!(S.hidden||{})[t.id]) a.push({id:t.id,role:r.role,cat:c.id,def:t.text,phase:2});
+  })));
+  (S.customTasks||[]).forEach(ct=>a.push({id:ct.id,role:ct.role,cat:ct.catId,def:ct.text,phase:ct.phase}));
+  return a;
+}
+function effectiveWeek(task,maxWeek){
+  return Math.max(0,Math.min(maxWeek,task.week+(S.weeks[task.id]||0)));
+}
+
+/* ── ヘッダー構築 ── */
+const LABELS1=['約7週前','約6週前','約5週前','約4週前','約3週前','約2週前','約1週前','公開開始'];
+const LABELS2=['終了直後','終了1週後','終了2週後','終了3週後'];
+
+function buildHeader(theadId,labels,datesKey,cols){
+  const row=document.getElementById(theadId); row.innerHTML='';
+  const th0=document.createElement('th'); th0.colSpan=2;
+  th0.innerHTML='<div class="th-inner">カテゴリ / 担当</div>'; row.appendChild(th0);
+  labels.forEach((lbl,i)=>{
+    const th=document.createElement('th');
+    if(i===cols-1) th.classList.add(datesKey==='dates1'?'hl':'hl-post');
+    const dv=S[datesKey][i]||'';
+    th.innerHTML=`<div class="th-inner">
+      <div class="th-week">${lbl}</div>
+      <input class="th-date" type="date" value="${dv}"
+        onchange="saveDate('${datesKey}',${i},this.value)"
+        onclick="event.stopPropagation()">
+      <div id="badge-${datesKey}-${i}">${dv?getDaysBadge(dv,datesKey):''}</div>
+    </div>`;
+    row.appendChild(th);
+  });
+}
+function getDaysBadge(ds, datesKey){
+  // 準備フェーズ→開始日基準、終了後フェーズ→終了日基準
+  const isPost = datesKey === 'dates2';
+  const baseStr = isPost ? (S.endDate || null) : (S.startDate || null);
+  const base = baseStr ? new Date(baseStr) : new Date();
+  base.setHours(0,0,0,0);
+  const t=new Date(ds); t.setHours(0,0,0,0);
+  const d=Math.round((t-base)/86400000);
+  if(!baseStr){
+    // 基準日未設定：今日基準
+    if(d===0) return '<span class="days-badge days-today">本日</span>';
+    if(d>0)   return `<span class="days-badge days-future">あと${d}日</span>`;
+    return `<span class="days-badge days-past">${Math.abs(d)}日前</span>`;
+  }
+  if(isPost){
+    // 終了日基準
+    if(d===0) return '<span class="days-badge days-today">終了当日</span>';
+    if(d>0)   return `<span class="days-badge days-future">終了${d}日後</span>`;
+    return `<span class="days-badge days-past">終了${Math.abs(d)}日前</span>`;
+  }
+  // 開始日基準
+  if(d===0) return '<span class="days-badge days-today">開始当日</span>';
+  if(d>0)   return `<span class="days-badge days-future">開始${d}日後</span>`;
+  return `<span class="days-badge days-past">開始${Math.abs(d)}日前</span>`;
+}
+window.saveDate=(dk,i,v)=>{
+  if(v) S[dk][i]=v; else delete S[dk][i];
+  save();
+  document.getElementById(`badge-${dk}-${i}`).innerHTML=v?getDaysBadge(v,dk):'';
+};
+
+/* ── 日付自動計算 ── */
+function addDaysToDate(dateStr,days){
+  const [y,m,d]=dateStr.split('-').map(Number);
+  const dt=new Date(y,m-1,d+days);
+  return [dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');
+}
+function diffDays(a,b){
+  const [y1,m1,d1]=a.split('-').map(Number);
+  const [y2,m2,d2]=b.split('-').map(Number);
+  return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000);
+}
+window.onDateChange=function(){
+  const si=document.getElementById('startDateInput');
+  const ei=document.getElementById('endDateInput');
+  const ss=si?si.value:'', es=ei?ei.value:'';
+  if(ss) S.startDate=ss;
+  if(es) S.endDate=es;
+  if(ss){ for(let i=0;i<8;i++) S.dates1[i]=addDaysToDate(ss,-(7-i)*7); }
+  if(es){ for(let i=0;i<4;i++) S.dates2[i]=addDaysToDate(es,i*7); }
+  const badge=document.getElementById('durationBadge');
+  if(badge&&ss&&es){
+    const diff=diffDays(ss,es);
+    if(diff>0){ badge.style.display='inline-block'; badge.style.background='var(--blue-ll)';
+      badge.style.borderColor='var(--blue)'; badge.style.color='var(--blue-d)';
+      badge.textContent=`📆 公開期間 ${diff}日間`;
+    } else { badge.style.display='inline-block'; badge.style.background='#fff0f0';
+      badge.style.borderColor='var(--cat5)'; badge.style.color='var(--cat5)';
+      badge.textContent='⚠️ 終了日が開始日より前です'; }
+  } else if(badge){ badge.style.display='none'; }
+  save();
+  buildHeader('thead1',LABELS1,'dates1',8);
+  buildHeader('thead2',LABELS2,'dates2',4);
+};
+window.clearAllDates=()=>{
+  if(!confirm('全ての日付をクリアしますか？')) return;
+  S.startDate=''; S.endDate=''; S.dates1={}; S.dates2={};
+  save();
+  buildHeader('thead1',LABELS1,'dates1',8);
+  buildHeader('thead2',LABELS2,'dates2',4);
+  const si=document.getElementById('startDateInput');
+  const ei=document.getElementById('endDateInput');
+  if(si) si.value=''; if(ei) ei.value='';
+  const badge=document.getElementById('durationBadge');
+  if(badge) badge.style.display='none';
+};
+
+/* ── テーブル構築 ── */
+let editMode=false, moveMode=false, filterMode='all', modalId=null;
+
+function buildTable(cats,tbodyId,maxWeek){
+  const tbody=document.getElementById(tbodyId); tbody.innerHTML='';
+  cats.forEach(cat=>{
+    cat.rows.forEach((row,ri)=>{
+      const tr=document.createElement('tr');
+      if(ri===0) tr.classList.add('cat-top');
+      tr.dataset.role=row.role;
+      if(filterMode!=='all'&&row.role!==filterMode) tr.classList.add('hide-row');
+      if(ri===0){
+        const td=document.createElement('td'); td.rowSpan=cat.rows.length;
+        td.className=`cat-cell ${cat.bg}`;
+        td.innerHTML=`<span class="${cat.cc}" style="font-size:12px">${cat.name}</span>`;
+        tr.appendChild(td);
+      }
+      const rtd=document.createElement('td');
+      rtd.className=`role-cell role-${row.role}`;
+      rtd.textContent=row.role==='exec'?'実行者様':'スポチュニティ';
+      tr.appendChild(rtd);
+
+      // 週ごとのタスクマップ（hiddenはスキップ）
+      const wm={};
+      row.tasks.forEach(t=>{
+        if((S.hidden||{})[t.id]) return;
+        const ew=effectiveWeek(t,maxWeek);
+        if(!wm[ew]) wm[ew]=[];
+        wm[ew].push(t);
+      });
+      // カスタムタスクも同じ行（同catId + role）に追加
+      const phase = tbodyId==='tbody1' ? 1 : 2;
+      (S.customTasks||[]).filter(ct=>ct.phase===phase&&ct.catId===cat.id&&ct.role===row.role).forEach(ct=>{
+        const ew = Math.max(0,Math.min(maxWeek,ct.week));
+        if(!wm[ew]) wm[ew]=[];
+        wm[ew].push({...ct, isCustom:true});
+      });
+
+      let w=0;
+      while(w<=maxWeek){
+        const tasks=wm[w];
+        if(tasks&&tasks.length>0){
+          // スパンは定義済みタスクのみに適用（カスタムが混在 or 移動済みの場合はスパンなし）
+          const defTasks = tasks.filter(t=>!t.isCustom);
+          const custTasks = tasks.filter(t=>t.isCustom);
+          const first = defTasks[0];
+          const hasMoved = first && (S.weeks[first.id]||0)!==0;
+          const sp = (!hasMoved && defTasks.length===1 && custTasks.length===0 && first && first.span) ? first.span+1 : 1;
+          const td=document.createElement('td');
+          td.className=`task-cell ${cat.bg}`;
+          if(sp>1) td.colSpan=sp;
+          td.dataset.week=w; td.dataset.tbodyId=tbodyId; td.dataset.maxWeek=maxWeek;
+          td.dataset.catId=cat.id; td.dataset.role=row.role;
+          setupDropTarget(td);
+          tasks.forEach(t=>{
+            if(t.isCustom) td.appendChild(makeCustomCardInline(t,row.role,maxWeek,tbodyId,cat));
+            else           td.appendChild(makeCard(t,row.role,maxWeek,tbodyId));
+          });
+          tr.appendChild(td); w+=sp;
+        } else {
+          const td=document.createElement('td');
+          td.className='empty-cell';
+          td.dataset.week=w; td.dataset.tbodyId=tbodyId; td.dataset.maxWeek=maxWeek;
+          td.dataset.catId=cat.id; td.dataset.role=row.role;
+          setupDropTarget(td);
+          tr.appendChild(td); w++;
+        }
+      }
+      tbody.appendChild(tr);
+    });
+  });
+
+  // カテゴリに属さないカスタムタスクは末尾行として追加
+  const phase = tbodyId === 'tbody1' ? 1 : 2;
+  const knownCatIds = cats.map(c=>c.id);
+  (S.customTasks||[]).filter(ct=>ct.phase===phase && !knownCatIds.includes(ct.catId)).forEach(ct=>{
+    const tr = document.createElement('tr');
+    tr.classList.add('cat-top');
+    tr.dataset.role = ct.role;
+    if(filterMode!=='all'&&ct.role!==filterMode) tr.classList.add('hide-row');
+    const catTd = document.createElement('td');
+    catTd.className = 'cat-cell';
+    catTd.style.cssText = 'background:#f5f0ff;border-left:3px solid #7c3aed;';
+    catTd.innerHTML = `<span style="color:#7c3aed;font-size:11px;">${ct.catName||'カスタム'}</span>`;
+    tr.appendChild(catTd);
+    const roleTd = document.createElement('td');
+    roleTd.className = `role-cell role-${ct.role}`;
+    roleTd.textContent = ct.role==='exec'?'実行者様':'スポチュニティ';
+    tr.appendChild(roleTd);
+    for(let w=0; w<=maxWeek; w++){
+      const td = document.createElement('td');
+      if(w===ct.week){
+        td.className='task-cell'; td.style.background='#f5f0ff'; td.style.borderLeft='3px solid #7c3aed';
+        td.appendChild(makeCustomCardInline(ct, ct.role, maxWeek, tbodyId, null));
+      } else {
+        td.className='empty-cell';
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+/* インライン表示のカスタムカード */
+function makeCustomCardInline(ct, role, maxWeek, tbodyId, cat){
+  const isDone = !!S.done[ct.id];
+  const hasMemo = !!(S.memos[ct.id]&&S.memos[ct.id].trim());
+  const card = document.createElement('div');
+  const bgClass = cat ? cat.bg : '';
+  card.className = `task-card ${role==='exec'?'tc-exec':'tc-cons'}${isDone?' done':''}`;
+  card.id = `card-${ct.id}`;
+
+  const chk = document.createElement('div'); chk.className='chk'; chk.textContent=isDone?'✓':'';
+  card.appendChild(chk);
+
+  const delBtn = document.createElement('button');
+  delBtn.className='pen-btn'; delBtn.title='削除'; delBtn.textContent='✕';
+  delBtn.style.background='#d94040';
+  delBtn.onclick=e=>{e.stopPropagation();deleteCustomTask(ct.id,tbodyId,maxWeek);};
+  card.appendChild(delBtn);
+
+  const te = document.createElement('div'); te.className='task-text'; te.textContent=ct.text;
+  card.appendChild(te);
+
+  const ma=document.createElement('div'); ma.id=`ma-${ct.id}`;
+  if(hasMemo){const mp=document.createElement('div');mp.className='memo-preview';mp.textContent=S.memos[ct.id];ma.appendChild(mp);}
+  const mb=document.createElement('button');mb.className=`memo-btn${hasMemo?' has':''}`;mb.id=`mb-${ct.id}`;
+  mb.innerHTML=hasMemo?'📝 メモあり':'+ メモ';
+  mb.onclick=e=>{e.stopPropagation();openModal(ct.id,ct.text);}; ma.appendChild(mb); card.appendChild(ma);
+
+  card.onclick=()=>{if(editMode||moveMode)return;toggleDone(ct.id);};
+  return card;
+}
+
+function deleteCustomTask(id, tbodyId, maxWeek){
+  if(!confirm('このタスクを削除しますか？')) return;
+  S.customTasks=(S.customTasks||[]).filter(t=>t.id!==id);
+  delete S.done[id]; delete S.memos[id];
+  save();
+  if(tbodyId==='tbody1') buildTable(CATS1,'tbody1',7);
+  else buildTable(CATS2,'tbody2',3);
+  updateStats();
+}
+
+function makeCard(task,role,maxWeek,tbodyId){
+  const isDone=!!S.done[task.id];
+  const hasMemo=!!(S.memos[task.id]&&S.memos[task.id].trim());
+  const txt=S.texts[task.id]||task.text;
+  const curWeek=effectiveWeek(task,maxWeek);
+  const card=document.createElement('div');
+  card.className=`task-card ${role==='exec'?'tc-exec':'tc-cons'}${isDone?' done':''}`;
+  card.id=`card-${task.id}`; card.draggable=false;
+
+  const chk=document.createElement('div'); chk.className='chk'; chk.textContent=isDone?'✓':'';
+  card.appendChild(chk);
+
+  // 編集モード時ボタン群（✏編集 + ✕削除）
+  const editBtns=document.createElement('div');
+  editBtns.className='pen-btn-group';
+  editBtns.style.cssText='display:none;position:absolute;top:4px;right:4px;flex-direction:row;gap:2px;z-index:5;';
+
+  const pen=document.createElement('button');
+  pen.style.cssText='width:17px;height:17px;border-radius:4px;background:var(--warn);color:#fff;border:none;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  pen.textContent='✏';
+  pen.onclick=e=>{e.stopPropagation();startEdit(task.id,card);};
+
+  const delBtn=document.createElement('button');
+  delBtn.style.cssText='width:17px;height:17px;border-radius:4px;background:#d94040;color:#fff;border:none;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+  delBtn.textContent='✕';
+  delBtn.onclick=e=>{
+    e.stopPropagation();
+    if(!confirm('このタスクを削除しますか？')) return;
+    // テキストカスタマイズがあれば削除、done/memoも削除
+    delete S.texts[task.id]; delete S.done[task.id]; delete S.memos[task.id];
+    // 定義済みタスクを非表示リストに追加
+    if(!S.hidden) S.hidden={};
+    S.hidden[task.id]=true;
+    save();
+    if(tbodyId==='tbody1') buildTable(CATS1,'tbody1',7);
+    else buildTable(CATS2,'tbody2',3);
+    updateStats();
+  };
+
+  editBtns.appendChild(pen);
+  editBtns.appendChild(delBtn);
+  card.appendChild(editBtns);
+
+  // 編集モード時にeditBtnsを表示するCSS制御はJSで行う（body.edit-modeに連動）
+  card._editBtns = editBtns;
+
+  const arrows=document.createElement('div'); arrows.className='move-arrows';
+  const lb=document.createElement('button'); lb.className='marr'; lb.textContent='◀'; lb.disabled=curWeek===0;
+  lb.onclick=e=>{e.stopPropagation();shiftTask(task.id,-1,maxWeek,tbodyId);};
+  const rb=document.createElement('button'); rb.className='marr'; rb.textContent='▶'; rb.disabled=curWeek>=maxWeek;
+  rb.onclick=e=>{e.stopPropagation();shiftTask(task.id,+1,maxWeek,tbodyId);};
+  arrows.appendChild(lb); arrows.appendChild(rb); card.appendChild(arrows);
+
+  const te=document.createElement('div'); te.className='task-text'; te.textContent=txt; card.appendChild(te);
+  const ta=document.createElement('textarea'); ta.className='task-ta'; ta.value=txt; ta.rows=3;
+  ta.onclick=e=>e.stopPropagation();
+  ta.onblur=()=>finishEdit(task.id,card);
+  ta.onkeydown=e=>{if(e.key==='Escape') cancelEdit(task.id,card);}; card.appendChild(ta);
+
+  const ma=document.createElement('div'); ma.id=`ma-${task.id}`;
+  if(hasMemo){ const mp=document.createElement('div'); mp.className='memo-preview'; mp.textContent=S.memos[task.id]; ma.appendChild(mp); }
+  const mb=document.createElement('button'); mb.className=`memo-btn${hasMemo?' has':''}`; mb.id=`mb-${task.id}`;
+  mb.innerHTML=hasMemo?'📝 メモあり':'+ メモ';
+  mb.onclick=e=>{e.stopPropagation();openModal(task.id,txt);}; ma.appendChild(mb); card.appendChild(ma);
+
+  card.onclick=()=>{if(editMode||moveMode) return; toggleDone(task.id);};
+  setupDragSource(card,task.id,maxWeek,tbodyId);
+  return card;
+}
+
+function rebuildAll(){
+  if(!PROJECT_ID) return;
+  buildHeader('thead1',LABELS1,'dates1',8);
+  buildHeader('thead2',LABELS2,'dates2',4);
+  buildTable(CATS1,'tbody1',7);
+  buildTable(CATS2,'tbody2',3);
+  buildCards(); updateStats();
+  applyCollapse(1); applyCollapse(2);
+  initLinkBar();
+  initMtgPanel();
+  const pnEl=document.getElementById('projectName');
+  if(pnEl&&S.pname) pnEl.value=S.pname;
+  const si=document.getElementById('startDateInput');
+  if(si&&S.startDate) si.value=S.startDate;
+  const ei=document.getElementById('endDateInput');
+  if(ei&&S.endDate) ei.value=S.endDate;
+  if(S.startDate&&S.endDate){
+    const badge=document.getElementById('durationBadge');
+    if(badge){
+      const diff=diffDays(S.startDate,S.endDate);
+      if(diff>0){ badge.style.display='inline-block'; badge.style.background='var(--blue-ll)';
+        badge.style.borderColor='var(--blue)'; badge.style.color='var(--blue-d)';
+        badge.textContent=`📆 公開期間 ${diff}日間`; }
+    }
+  }
+}
+
+/* ── チェック ── */
+function toggleDone(id){
+  S.done[id]=!S.done[id];
+  const card=document.getElementById(`card-${id}`);
+  if(card){ card.classList.toggle('done',S.done[id]); const chk=card.querySelector('.chk'); if(chk) chk.textContent=S.done[id]?'✓':''; }
+  save(); updateStats();
+}
+
+/* ── 週移動 ── */
+function shiftTask(id,delta,maxWeek,tbodyId){
+  S.weeks[id]=(S.weeks[id]||0)+delta; save();
+  if(tbodyId==='tbody1') buildTable(CATS1,'tbody1',7);
+  else buildTable(CATS2,'tbody2',3);
+  updateStats();
+}
+
+/* ── ドラッグ&ドロップ ── */
+let dragTaskId=null, dragMaxWeek=null, dragTbodyId=null;
+function setupDragSource(card,taskId,maxWeek,tbodyId){
+  card.addEventListener('dragstart',e=>{
+    if(!moveMode){e.preventDefault();return;}
+    dragTaskId=taskId; dragMaxWeek=maxWeek; dragTbodyId=tbodyId;
+    card.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+  });
+  card.addEventListener('dragend',()=>{
+    card.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));
+  });
+}
+function setupDropTarget(td){
+  td.addEventListener('dragover',e=>{
+    if(!moveMode||!dragTaskId) return; e.preventDefault();
+    document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));
+    td.classList.add('drag-over');
+  });
+  td.addEventListener('dragleave',()=>td.classList.remove('drag-over'));
+  td.addEventListener('drop',e=>{
+    e.preventDefault(); td.classList.remove('drag-over');
+    if(!dragTaskId) return;
+    const tw=parseInt(td.dataset.week); if(isNaN(tw)) return;
+    const cats=dragTbodyId==='tbody1'?CATS1:CATS2;
+    let base=null;
+    cats.forEach(c=>c.rows.forEach(r=>r.tasks.forEach(t=>{if(t.id===dragTaskId) base=t.week;})));
+    if(base===null) return;
+    S.weeks[dragTaskId]=tw-base; save();
+    if(dragTbodyId==='tbody1') buildTable(CATS1,'tbody1',7);
+    else buildTable(CATS2,'tbody2',3);
+    updateStats(); dragTaskId=null;
+  });
+}
+
+/* ── フィルター ── */
+window.setFilter=(mode)=>{
+  filterMode=mode;
+  ['all','exec','cons'].forEach(m=>document.getElementById(`f-${m}`).classList.toggle('sel',m===mode));
+  ['tbody1','tbody2'].forEach(id=>{
+    document.querySelectorAll(`#${id} tr`).forEach(tr=>{
+      tr.classList.toggle('hide-row',mode!=='all'&&tr.dataset.role!==mode);
+    });
+  });
+};
+
+/* ── 編集・移動モード ── */
+window.toggleEdit=()=>{
+  if(moveMode) window.toggleMove();
+  document.querySelectorAll('.task-card.editing').forEach(c=>finishEdit(c.id.replace('card-',''),c));
+  editMode=!editMode;
+  document.body.classList.toggle('edit-mode',editMode);
+  document.getElementById('editBanner').classList.toggle('on',editMode);
+  const btn=document.getElementById('editBtn');
+  btn.classList.toggle('active',editMode);
+  btn.textContent=editMode?'✅ 編集終了':'✏️ 編集';
+  // editBtnsグループの表示切り替え
+  document.querySelectorAll('.task-card').forEach(c=>{
+    if(c._editBtns) c._editBtns.style.display=editMode?'flex':'none';
+  });
+};
+window.toggleMove=()=>{
+  if(editMode) window.toggleEdit();
+  moveMode=!moveMode;
+  document.body.classList.toggle('move-mode',moveMode);
+  document.getElementById('moveBanner').classList.toggle('on',moveMode);
+  const btn=document.getElementById('moveBtn');
+  btn.classList.toggle('active',moveMode);
+  btn.textContent=moveMode?'✅ 移動終了':'🔀 移動';
+  document.querySelectorAll('.task-card').forEach(c=>{c.draggable=moveMode;});
+};
+function startEdit(id,card){
+  if(!editMode) return;
+  document.querySelectorAll('.task-card.editing').forEach(c=>{if(c!==card) finishEdit(c.id.replace('card-',''),c);});
+  card.classList.add('editing');
+  const ta=card.querySelector('.task-ta'); ta.focus(); ta.select();
+}
+function finishEdit(id,card){
+  if(!card) card=document.getElementById(`card-${id}`);
+  if(!card||!card.classList.contains('editing')) return;
+  card.classList.remove('editing');
+  const ta=card.querySelector('.task-ta');
+  const newTxt=(ta.value||'').trim(); if(!newTxt) return;
+  const def=allTasks().find(t=>t.id===id);
+  if(def&&newTxt!==def.def) S.texts[id]=newTxt; else delete S.texts[id];
+  save();
+  const te=card.querySelector('.task-text'); if(te) te.textContent=newTxt;
+}
+function cancelEdit(id,card){
+  card.classList.remove('editing');
+  const ta=card.querySelector('.task-ta'); const te=card.querySelector('.task-text');
+  if(ta&&te) ta.value=te.textContent;
+}
+
+/* ── メモ ── */
+window.closeModal=()=>{ document.getElementById('overlay').classList.remove('open'); modalId=null; };
+window.overlayClick=(e)=>{ if(e.target===document.getElementById('overlay')) window.closeModal(); };
+window.saveMemo=()=>{
+  if(!modalId) return;
+  const txt=document.getElementById('modalTa').value.trim();
+  if(txt) S.memos[modalId]=txt; else delete S.memos[modalId];
+  save(); refreshMemo(modalId); window.closeModal();
+};
+window.deleteMemo=()=>{
+  if(!modalId) return; delete S.memos[modalId];
+  save(); refreshMemo(modalId); window.closeModal();
+};
+document.getElementById('modalTa').addEventListener('input',function(){
+  document.getElementById('modalMeta').textContent=this.value.length?`${this.value.length}文字`:'';
+});
+
+// URLをリンクに変換
+function linkify(text){
+  const escaped = text
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+  return escaped.replace(/(https?:\/\/[^\s\u3000\u300d\uff09]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;word-break:break-all;">$1</a>');
+}
+
+let memoPreviewMode = false;
+window.toggleMemoPreview = function(){
+  memoPreviewMode = !memoPreviewMode;
+  const ta  = document.getElementById('modalTa');
+  const pre = document.getElementById('modalPreview');
+  const btn = document.getElementById('memoPreviewToggle');
+  if(memoPreviewMode){
+    pre.innerHTML = linkify(ta.value || '（まだメモがありません）');
+    ta.style.display  = 'none';
+    pre.style.display = 'block';
+    btn.textContent   = '✏️ 編集';
+    btn.style.background = 'var(--blue-ll)';
+    btn.style.color      = 'var(--blue)';
+  } else {
+    ta.style.display  = 'block';
+    pre.style.display = 'none';
+    btn.textContent   = '🔗 プレビュー';
+    btn.style.background = 'var(--surface2)';
+    btn.style.color      = 'var(--muted)';
+    setTimeout(()=>ta.focus(), 50);
+  }
+};
+function openModal(id,taskTxt){
+  modalId=id;
+  const memo=S.memos[id]||'';
+  document.getElementById('modalTitle').textContent=taskTxt.replace(/\n/g,' ');
+  document.getElementById('modalTa').value=memo;
+  document.getElementById('modalTa').style.display='block';
+  document.getElementById('modalPreview').style.display='none';
+  document.getElementById('modalMeta').textContent=memo?`${memo.length}文字`:'';
+  document.getElementById('btnDel').style.display=memo?'inline-flex':'none';
+  const btn=document.getElementById('memoPreviewToggle');
+  if(btn){ btn.textContent='🔗 プレビュー'; btn.style.background='var(--surface2)'; btn.style.color='var(--muted)'; }
+  memoPreviewMode=false;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('modalTa').focus(),80);
+}
+function refreshMemo(id){
+  const hasMemo=!!(S.memos[id]&&S.memos[id].trim());
+  const ma=document.getElementById(`ma-${id}`); if(!ma) return;
+  let mp=ma.querySelector('.memo-preview');
+  if(hasMemo){
+    if(!mp){mp=document.createElement('div');mp.className='memo-preview';ma.insertBefore(mp,ma.querySelector('.memo-btn'));}
+    mp.innerHTML=linkify(S.memos[id]);
+  } else { if(mp) mp.remove(); }
+  const mb=document.getElementById(`mb-${id}`);
+  if(mb){ mb.className=`memo-btn${hasMemo?' has':''}`; mb.innerHTML=hasMemo?'📝 メモあり':'+ メモ'; }
+}
+
+/* ── 統計 ── */
+function updateStats(){
+  const all=allTasks();
+  const tot=all.length, don=all.filter(t=>S.done[t.id]).length;
+  const eA=all.filter(t=>t.role==='exec'), cA=all.filter(t=>t.role==='cons');
+  const eD=eA.filter(t=>S.done[t.id]).length, cD=cA.filter(t=>S.done[t.id]).length;
+  const pct=tot?Math.round(don/tot*100):0;
+  document.getElementById('gbar').style.width=pct+'%';
+  document.getElementById('gbarLabel').textContent=pct+'%';
+  document.getElementById('sPct').textContent=pct+'%';
+  document.getElementById('sExec').textContent=`${eD}/${eA.length}`;
+  document.getElementById('sCons').textContent=`${cD}/${cA.length}`;
+  [...CATS1,...CATS2].forEach(cat=>{
+    const tasks=[]; cat.rows.forEach(r=>r.tasks.forEach(t=>tasks.push({id:t.id,role:r.role})));
+    const t2=tasks.length, d2=tasks.filter(t=>S.done[t.id]).length;
+    const eT=tasks.filter(t=>t.role==='exec'), cT=tasks.filter(t=>t.role==='cons');
+    const eD2=eT.filter(t=>S.done[t.id]).length, cD2=cT.filter(t=>S.done[t.id]).length;
+    const pb=document.getElementById(`pb-${cat.id}`);
+    const pl=document.getElementById(`pbl-${cat.id}`);
+    const pn=document.getElementById(`pcn-${cat.id}`);
+    if(pb) pb.style.width=(t2?Math.round(d2/t2*100):0)+'%';
+    if(pl) pl.textContent=`実行者 ${eD2}/${eT.length}　スポチュニティ ${cD2}/${cT.length}`;
+    if(pn) pn.textContent=`${d2}/${t2}`;
+  });
+  updateMessage(pct);
+  const all1=allTasks().filter(t=>t.phase===1);
+  const all2=allTasks().filter(t=>t.phase===2);
+  const don1=all1.filter(t=>S.done[t.id]).length;
+  const don2=all2.filter(t=>S.done[t.id]).length;
+  const pct1=all1.length?Math.round(don1/all1.length*100):0;
+  const pct2=all2.length?Math.round(don2/all2.length*100):0;
+  ['1','2'].forEach(n=>{
+    const pp=document.getElementById(`prog${n}Pct`);
+    const pf=document.getElementById(`prog${n}Fill`);
+    const ps=document.getElementById(`prog${n}Sub`);
+    const pct_=n==='1'?pct1:pct2;
+    const don_=n==='1'?don1:don2;
+    const all_=n==='1'?all1:all2;
+    if(pp) pp.textContent=pct_+'%';
+    if(pf) pf.style.width=pct_+'%';
+    if(ps) ps.textContent=`${don_} / ${all_.length} タスク完了`;
+  });
+}
+function updateMessage(pct){
+  const banner=document.getElementById('msgBanner');
+  const msg=MESSAGES.find(m=>pct>=m.pct);
+  if(!msg||pct===0){banner.classList.remove('on');return;}
+  banner.classList.add('on');
+  banner.style.background=msg.bg; banner.style.borderBottomColor=msg.bc; banner.style.color=msg.tc;
+  banner.innerHTML=`<span style="font-size:20px">${msg.emoji}</span> ${msg.msg}
+    <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:18px;font-weight:900">${pct}%</span>`;
+}
+
+/* ── サマリーカード ── */
+function buildCards(){
+  const g=document.getElementById('cardsGrid'); g.innerHTML='';
+  [...CATS1,...CATS2].forEach(cat=>{
+    const tasks=[]; cat.rows.forEach(r=>r.tasks.forEach(t=>tasks.push({id:t.id,role:r.role})));
+    const tot=tasks.length, don=tasks.filter(t=>S.done[t.id]).length;
+    const eT=tasks.filter(t=>t.role==='exec'), cT=tasks.filter(t=>t.role==='cons');
+    const eD=eT.filter(t=>S.done[t.id]).length, cD=cT.filter(t=>S.done[t.id]).length;
+    const pct=tot?Math.round(don/tot*100):0;
+    const c=document.createElement('div'); c.className='phase-card'; c.id=`pc-${cat.id}`;
+    c.innerHTML=`
+      <div class="pcard-title">
+        <div class="cat-dot" style="background:${cat.cv}"></div>
+        <span>${cat.name.replace(/\n/g,'')}</span>
+        <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:12px;color:${cat.cv}" id="pcn-${cat.id}">${don}/${tot}</span>
+      </div>
+      <div class="pbar-w"><div class="pbar-f" id="pb-${cat.id}" style="width:${pct}%;background:${cat.cv}"></div></div>
+      <div class="pbar-l" id="pbl-${cat.id}">実行者 ${eD}/${eT.length}　スポチュニティ ${cD}/${cT.length}</div>`;
+    g.appendChild(c);
+  });
+}
+
+/* ── タスク追加モーダル ── */
+let addPhase = 1;
+
+window.openAddModal = function(){
+  addPhase = 1;
+  updateAddWeekOptions();
+  updateAddPhaseTabs();
+  document.getElementById('addText').value = '';
+  updateAddHint();
+  document.getElementById('addOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('addText').focus(), 80);
+};
+window.closeAddModal = function(){
+  document.getElementById('addOverlay').classList.remove('open');
+};
+window.switchAddPhase = function(phase){
+  addPhase = phase;
+  updateAddWeekOptions();
+  updateAddPhaseTabs();
+  updateAddHint();
+};
+
+function updateAddWeekOptions(){
+  const sel = document.getElementById('addWeek'); if(!sel) return;
+  const labels = addPhase === 1 ? LABELS1 : LABELS2;
+  sel.innerHTML = '';
+  labels.forEach((lbl, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = lbl;
+    sel.appendChild(opt);
+  });
+}
+
+function updateAddPhaseTabs(){
+  const t1=document.getElementById('addTab1');
+  const t2=document.getElementById('addTab2');
+  if(!t1||!t2) return;
+  if(addPhase===1){
+    t1.style.background='var(--blue)'; t1.style.borderColor='var(--blue)'; t1.style.color='#fff';
+    t2.style.background='var(--bg)';   t2.style.borderColor='var(--border)'; t2.style.color='var(--muted)';
+  } else {
+    t1.style.background='var(--bg)';   t1.style.borderColor='var(--border)'; t1.style.color='var(--muted)';
+    t2.style.background='var(--cat5)'; t2.style.borderColor='var(--cat5)';   t2.style.color='#fff';
+  }
+}
+
+// 追加先ヒント表示
+window.updateAddHint = function(){
+  const hint = document.getElementById('addTargetHint');
+  if(!hint) return;
+  const role = document.getElementById('addRole').value;
+  const weekIdx = parseInt(document.getElementById('addWeek').value);
+  const labels = addPhase===1 ? LABELS1 : LABELS2;
+  const weekLabel = labels[weekIdx] || `週${weekIdx}`;
+  const roleLabel = role==='exec' ? '実行者様' : 'スポチュニティ';
+  const phaseLabel = addPhase===1 ? '準備フェーズ' : '終了後フェーズ';
+  hint.textContent = `📍 追加先：${phaseLabel} ／ ${roleLabel} ／ ${weekLabel} の列`;
+  hint.classList.add('show');
+};
+
+window.submitAddTask = function(){
+  const text = (document.getElementById('addText').value || '').trim();
+  const role = document.getElementById('addRole').value;
+  const week = parseInt(document.getElementById('addWeek').value);
+  if(!text){ alert('タスク名を入力してください'); return; }
+
+  // 対応するcatIdを特定（既存行のcatIdに合わせる）
+  const cats = addPhase===1 ? CATS1 : CATS2;
+  // 同じroleを持つ最初のカテゴリに自動紐付け
+  let catId = '', catName = 'カスタム';
+  for(const cat of cats){
+    if(cat.rows.some(r=>r.role===role)){
+      catId = cat.id; catName = cat.name.replace(/\n/g,'');
+      break;
+    }
+  }
+
+  if(!S.customTasks) S.customTasks = [];
+  S.customTasks.push({
+    id: 'ct_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
+    text, role, week, phase: addPhase, catId, catName,
+    createdAt: Date.now(),
+  });
+  save();
+  window.closeAddModal();
+  if(addPhase===1) buildTable(CATS1,'tbody1',7);
+  else             buildTable(CATS2,'tbody2',3);
+  updateStats();
+};
+
+/* ── リセット ── */
+window.resetCheck=()=>{
+  if(!confirm(`プロジェクト「${PROJECT_ID}」のチェックと週移動をリセットします。\nよろしいですか？`)) return;
+  S.done={}; S.weeks={}; S.hidden={};
+  save();
+  buildTable(CATS1,'tbody1',7);
+  buildTable(CATS2,'tbody2',3);
+  document.querySelectorAll('.task-card').forEach(c=>{
+    c.classList.remove('done');
+    const chk=c.querySelector('.chk'); if(chk) chk.textContent='';
+  });
+  updateStats();
+};
+
+/* ── プロジェクト名 ── */
+const pnEl=document.getElementById('projectName');
+if(pnEl){ pnEl.value=S.pname||''; pnEl.addEventListener('input',()=>{ S.pname=pnEl.value; save(); registerProject(PROJECT_ID, S.pname); }); }
+
+/* ── 初期化 ── */
+if(PROJECT_ID){
+  rebuildAll();
+  initFirebase();
+}
+</script>
+</body>
+</html>
